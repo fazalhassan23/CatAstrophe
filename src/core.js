@@ -13,20 +13,20 @@ class Run{
  drain(){const e=this.events;this.events=[];return e}
  flap(){if(this.state!=='playing')return;if(this.tangle>0){this.taps++;if(this.taps>=3)this.escape();return}this.flaps++;this.vy=C.impulse*this.trait.flap*(this.armor>0?.93:1);this.flapAge=0;this.emit('flap')}
  moodSet(m,t=1){this.mood=m;this.moodTime=t}
- escape(){this.tangle=0;this.vy=-140;this.invuln=1.1;this.escapes++;this.moodSet('proud');this.emit('rescue',{text:'UNTANGLED. DIGNITY STILL MISSING.'})}
- recover(g){if(this.invuln>0||g.ignored){g.ignored=true;g.near=false;return true}if(g.type==='yarn'){g.ignored=true;g.near=false;this.tangle=1.5;this.taps=0;this.vy=0;this.combo=0;this.moodSet('spooked',2);this.emit('rescue',{text:'YARN TANGLE! Tap 3 times, or wait to escape.'});return true}if(this.armor>0){this.armor=0;g.ignored=true;g.near=false;this.invuln=1.1;this.vy=-120;this.y=clamp(this.y,g.center-g.gap/2+25,g.center+g.gap/2-25);this.combo=0;this.blocks++;this.moodSet('spooked');this.emit('rescue',{text:'BOX SAVED YOU. Box is now confetti.'});return true}if(this.rescues>0){g.ignored=true;g.near=false;return this.rescue(g.center)}return false}
- rescue(y=350){if(this.rescues<=0)return false;this.rescues--;this.usedRescues++;this.y=clamp(y,150,540);this.vy=-130;this.invuln=1.5;this.combo=0;this.moodSet('spooked');this.emit('rescue',{text:'EMERGENCY AIR BOUNCE! One rescue used.'});return true}
+ escape(){this.tangle=0;this.vy=-140;this.invuln=1.1;this.escapes++;this.moodSet('proud');this.emit('rescue',{text:'You’re free! Nice tapping!'})}
+ recover(g){if(this.invuln>0||g.ignored){g.ignored=true;g.near=false;return true}if(g.type==='yarn'){g.ignored=true;g.near=false;this.tangle=1.5;this.taps=0;this.vy=0;this.combo=0;this.moodSet('spooked',2);this.emit('rescue',{text:'YARN TANGLE! Tap 3 times, or wait to escape.'});return true}if(this.armor>0){this.armor=0;g.ignored=true;g.near=false;this.invuln=1.1;this.vy=-120;this.y=clamp(this.y,g.center-g.gap/2+25,g.center+g.gap/2-25);this.combo=0;this.blocks++;this.moodSet('spooked');this.emit('rescue',{text:'Your box saved you! It can block one obstacle.'});return true}if(this.rescues>0){g.ignored=true;g.near=false;return this.rescue(g.center)}return false}
+ rescue(y=350){if(this.rescues<=0)return false;this.rescues--;this.usedRescues++;this.y=clamp(y,150,540);this.vy=-130;this.invuln=1.5;this.combo=0;this.moodSet('spooked');this.emit('rescue',{text:'A heart saved you! One heart used.'});return true}
  ability(){const cost=this.cat==='pounce'?65:100;if(this.state!=='playing'||this.charge<cost||this.cooldown>0||this.tangle>0)return false;this.charge-=cost;this.dash=this.cat==='pounce'?.28:.42;this.invuln=Math.max(this.invuln,this.dash+.25);this.cooldown=1.5;this.vy=this.cat==='pounce'?-330:-160;this.dashes++;this.moodSet('zoomies');this.emit('power',{text:this.cat==='pounce'?'AIR POUNCE!':'ZOOMIES! A brief, protected burst.'});return true}
  collect(f){if(f.taken)return;f.taken=true;
-  if(f.kind==='box'){this.armor=8;this.emit('power',{text:'CARDBOARD ARMOR · 8s · one impact'});return}
+  if(f.kind==='box'){this.armor=8;this.emit('power',{text:'BOX SHIELD · blocks one obstacle · lasts 8s'});return}
   if(f.kind==='nip'){this.nip=8;this.charge=100;this.emit('power',{text:'CATNIP RUSH · 8s · double fish + Zoomies ready'});return}
-  if(f.kind==='magnet'){this.magnet=7;this.emit('power',{text:'FISH MAGNET · 7s · nearby fish come to you'});return}
-  if(f.kind==='life'){const full=this.rescues===2;this.rescues=Math.min(2,this.rescues+1);this.emit('power',{text:full?'RESCUES FULL · 2 / 2':'EXTRA RESCUE · '+this.rescues+' / 2 automatic air bounces'});return}
+  if(f.kind==='magnet'){this.magnet=7;this.emit('power',{text:'FISH MAGNET · fish come to you for 7s'});return}
+  if(f.kind==='life'){const full=this.rescues===2;this.rescues=Math.min(2,this.rescues+1);this.emit('power',{text:full?'HEARTS FULL · 2 / 2':'EXTRA HEART · '+this.rescues+' / 2 extra chances'});return}
   if(f.kind==='yarn'){this.tokens++;this.emit('power',{text:'YARN TOKEN · for your outfit closet'});return}
   const base=f.kind==='gold'?5:f.kind==='mystery'?1+Math.floor(this.rewardRand()*4):1,n=base*(this.nip>0?2:1);this.fish+=n;this.score+=n*3;this.stats.fish+=n*3;this.charge=clamp(this.charge+12,0,100);this.moodSet('excited');this.emit('fish',{x:f.x,y:f.y})}
  pause(){if(this.state==='playing')this.state='paused';else if(this.state==='paused')this.state='playing'}
  end(reason){if(this.state!=='playing')return;if(this.tutorial){this.y=clamp(this.y,120,580);this.vy=-100;this.emit('practice',{text:'Safe practice! A gentle bounce. Try a small flap.'});return;}this.state='over';this.death=reason;this.mood='spooked';this.emit('over',{reason})}
- beginEncounter(){if(this.encounterSeen)return;this.encounterSeen=true;this.encounter=10;this.emit('world',{text:'THE GIANT VACUUM · stay in the clear corridor for 10s'})}
+ beginEncounter(){if(this.encounterSeen)return;this.encounterSeen=true;this.encounter=10;this.emit('world',{text:'THE GIANT VACUUM · fly through the open gaps for 10s'})}
  spawn(){
   const type=this.encounter>0?'vacuum':TYPES[this.id%TYPES.length],gap=this.encounter>0?230:C.gap-Math.min(24,this.id*1.2);
   this.center=clamp(this.center+(this.rand()-.5)*120,220,480);

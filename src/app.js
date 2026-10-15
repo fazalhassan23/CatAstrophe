@@ -15,15 +15,17 @@ function applySettings(){
 }
 function button(text,action,cls='secondary'){const b=document.createElement('button');b.textContent=text;b.className=cls;b.onclick=()=>action();return b}
 function show(html){const s=$('#screen');s.className='screen';s.innerHTML='<div class="panel">'+html+'</div>';return s.firstElementChild}
+function flightHelp(){return matchMedia('(pointer: coarse)').matches?{flap:'Tap the sky',dash:'Tap ZOOMIES',pause:'Tap the pause button'}:{flap:'Press Space or ↑',dash:'Press X or click ZOOMIES',pause:'Press P to pause'}}
+function friendlyHint(text){const h=flightHelp();return text.replaceAll('Tap the sky or press Space / ↑',h.flap).replaceAll('Press X or tap ZOOMIES',h.dash)}
 function note(p,text){const n=document.createElement('p');n.textContent=text;p.append(n)}
 function menu(){
  mode='menu';run=null;trainer=null;$('#lesson').hidden=true;$('#toast').textContent='';daily='';$('#hud').hidden=true;$('#live-controls').hidden=true;updateCat();
- const p=show('<span class="eyebrow">THE SKY IS NOT READY</span><h2>cat-astrophe!</h2><canvas class="menu-cat" width="600" height="260"></canvas><p>Tiny paws. Terrible decisions.<br>How far can you fly before it all goes wrong?</p><div class="meta"><span><b>'+save.best+'</b>PERSONAL BEST</span><span><b>'+save.balance+'</b>FISH BANK</span></div>');
- p.append(button(save.walkthroughComplete?'Let’s cause trouble  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
+ const p=show('<span class="eyebrow">LET’S HELP YOUR CAT FLY</span><h2>cat-astrophe!</h2><canvas class="menu-cat" width="600" height="260"></canvas><p>Tap to fly. Dodge obstacles. Catch fish!<br>New here? Try a safe practice flight.</p><div class="meta"><span><b>'+save.best+'</b>PERSONAL BEST</span><span><b>'+save.balance+'</b>FISH BANK</span></div>');
+ p.append(button(save.walkthroughComplete?'Let’s play  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
  if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
  const row=document.createElement('div');row.className='menu-row';
  row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));p.append(row);if(rootBoard())p.append(button('Global top 100',leaderboard));
- note(p,'SPACE / ↑ / TAP TO FLAP · X FOR ABILITY');
+ const h=flightHelp();note(p,h.flap+' to go up. Stop to float down.');note(p,h.dash+' when the meter is full. '+h.pause+'.');note(p,'Hearts give you another chance. Carry up to 2!');
 }
 function rootBoard(){return globalThis.CatBoard}
 function leaderboard(){mode='leaderboard';const p=show('<span class="eyebrow">THE WORLD’S BIGGEST MENACES</span><h2>Global top 100.</h2>'),scores=document.createElement('div');p.append(button('Classic',()=>CatBoard.list(scores,'classic')),button('Daily',()=>CatBoard.list(scores,'daily')),scores,button('Back',menu));CatBoard.list(scores,'classic')}
@@ -95,17 +97,17 @@ function startWalkthrough(){
 function updateLesson(){
  if(!trainer)return;const step=CatTraining.STEPS[trainer.stage];
  $('#lesson-title').textContent=step?.title||'CLEARED FOR TAKEOFF';
- $('#lesson-text').textContent=trainer.hint;
- $('#lesson-progress').textContent=trainer.stage===0?Math.min(run.flaps,3)+' / 3 flaps':trainer.stage===1?Math.min(run.fish,3)+' / 3 fish':trainer.stage===2?'Pounce with X or the ability button':'Dodge the warned pigeon lane';
+ $('#lesson-text').textContent=friendlyHint(trainer.hint);
+ $('#lesson-progress').textContent=trainer.stage===0?Math.min(run.flaps,3)+' / 3 flaps':trainer.stage===1?Math.min(run.fish,3)+' / 3 fish':trainer.stage===2?flightHelp().dash:'Stay away from the dotted line';
 }
 function graduated(){
  save.walkthroughComplete=true;store.write();run.state='complete';mode='tutorial-done';
  $('#lesson').hidden=true;$('#live-controls').hidden=true;
- const p=show('<span class="eyebrow">WALKTHROUGH COMPLETE</span><h2>A licensed<br>little menace.</h2><p>You can flap, catch fish, pounce into trouble, and dodge the consequences.<br>Practice rewards stay in practice. Real flights bank your fish.</p>');
+ const p=show('<span class="eyebrow">WALKTHROUGH COMPLETE</span><h2>You’re ready<br>to fly!</h2><p>Great job! You can fly, catch fish, dash, and dodge.<br>Fish from your next flight go into your fish bank.</p>');
  p.append(button('My first real flight  →',()=>start(false),'play'),button('Practice again',startWalkthrough),button('Main menu',menu));
 }
 function pausedMenu(){
- mode='paused';const p=show('<span class="eyebrow">A TACTICAL NAP</span><h2>Chaos on hold.</h2><p>Your cat is contemplating its choices.</p>');
+ mode='paused';const p=show('<span class="eyebrow">TAKE A LITTLE BREAK</span><h2>Flight paused.</h2><p>Your cat will wait. Keep flying whenever you’re ready!</p>');
  p.append(button('Resume flight',resume,'play'),button('Restart',()=>{if(run.tutorial)startWalkthrough();else start()}),button('Settings',()=>settings(pausedMenu)),button('Main menu',menu));
 }
 function pause(){
@@ -116,8 +118,8 @@ function pause(){
 function resume(){if(!run)return;run.state='playing';$('#screen').className='screen empty';mode='playing';acc=0;last=0;canvas.focus()}
 function over(){
  mode='over';report=store.settle(run,daily);$('#live-controls').hidden=true;if(report?.newBest)audio.play('unlock');
- const names={ground:'Gravity has filed a complaint.',ceiling:'The sky has a ceiling. Who knew?',laundry:'Defeated by a sock. A new low.',pigeon:'The pigeons are unionized.',vacuum:'The vacuum has won this round.',toast:'Officially toast.',fan:'A fan. Not a fan of you.',yarn:'A tangled relationship.'};
- const p=show('<span class="eyebrow">'+(run.lab?'LAB FLIGHT · NO REWARDS':daily?'DAILY FLIGHT · '+daily:'FLIGHT REPORT')+'</span><h2>'+(report?.newBest?'A new record!':'One small bonk.')+'</h2><p>'+names[run.death]+'</p><div class="result-grid"><div><b>'+run.score+'</b>SCORE</div><div><b>'+save.best+'</b>BEST</div><div><b>'+run.fish+'</b>FISH '+(run.lab?'CAUGHT':'BANKED')+'</div><div><b>'+run.near+' / '+run.bestCombo+'×</b>NEAR MISSES / COMBO</div></div><p>'+run.passed+' disasters avoided. Absolutely no lessons learned.<br>Distance '+(run.stats.distance||0)+' · Passes '+run.stats.pass+' · Fish '+run.stats.fish+'<br>Dodges '+run.stats.near+' · Worlds '+run.stats.world+' · Events '+(run.stats.event||0)+' · Mischief '+(run.stats.mischief||0)+'<br>'+run.escapes+' tangles escaped · '+run.blocks+' boxes sacrificed.</p>');
+ const names={ground:'A little tumble! Try a few small flaps.',ceiling:'A little too high! Let your cat float down.',laundry:'Watch out for the laundry next time!',pigeon:'Watch the dotted line to dodge pigeons.',vacuum:'Fly through the open gap to dodge the vacuum.',toast:'Watch out for the toast! Try again.',fan:'Give the fan a little more space.',yarn:'Caught in yarn! Tap three times to get free.'};
+ const p=show('<span class="eyebrow">'+(run.lab?'LAB FLIGHT · NO REWARDS':daily?'DAILY FLIGHT · '+daily:'FLIGHT REPORT')+'</span><h2>'+(report?.newBest?'A new record!':'Nice try!')+'</h2><p>'+names[run.death]+'</p><div class="result-grid"><div><b>'+run.score+'</b>SCORE</div><div><b>'+save.best+'</b>BEST</div><div><b>'+run.fish+'</b>FISH '+(run.lab?'CAUGHT':'SAVED')+'</div><div><b>'+run.near+' / '+run.bestCombo+'×</b>NEAR MISSES / COMBO</div></div><p>'+run.passed+' obstacles passed. Keep practicing—you’ve got this!<br>Distance '+(run.stats.distance||0)+' · Passes '+run.stats.pass+' · Fish '+run.stats.fish+'<br>Dodges '+run.stats.near+' · Worlds '+run.stats.world+' · Events '+(run.stats.event||0)+' · Mischief '+(run.stats.mischief||0)+'<br>'+run.escapes+' tangles escaped · '+run.blocks+' boxes sacrificed.</p>');
  if(run.mischief){
   const m=run.mischief.counts,parts=[];
   if(m.pots)parts.push(m.pots+' flowerpot'+(m.pots===1?'':'s')+' smashed');
@@ -125,7 +127,7 @@ function over(){
   if(m.bells)parts.push(m.bells+' bell'+(m.bells===1?'':'s')+' rung');
   if(m.pigeons)parts.push(m.pigeons+' pigeon'+(m.pigeons===1?'':'s')+' outsmarted');
   const crime=document.createElement('div');crime.className='crime-report';
-  crime.innerHTML='<b>YOUR CRIME REPORT</b>';const text=document.createElement('p');text.textContent=parts.length?parts.join(' · '):'No incidents filed. Suspiciously well behaved.';crime.append(text);p.append(crime);
+  crime.innerHTML='<b>YOUR CAT ADVENTURE</b>';const text=document.createElement('p');text.textContent=parts.length?parts.join(' · '):'A peaceful flight. Try a Zoomies dash next time!';crime.append(text);p.append(crime);
   note(p,'Mischief bonus: '+(run.stats.mischief||0)+' points');
  }
  if(report?.completed.length)note(p,report.completed.map(m=>'Mission: '+m.title+' (+'+m.reward+' fish)').join(' · '));
