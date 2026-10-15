@@ -1,0 +1,9 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');const {Run,C,TYPES}=require('../src/core.js');
+test('flap is immediate; falling is capped; restart owns fresh state',()=>{const r=new Run(4);r.flap();assert.equal(r.vy,C.impulse);r.step(1/120);assert.ok(r.y<350);const n=new Run(4);assert.equal(n.fish,0);assert.equal(n.items.length,0);assert.equal(n.vy,0)});
+test('pause freezes all gameplay',()=>{const r=new Run(1);r.pause();for(let i=0;i<500;i++)r.step(1/120);assert.equal(r.time,0);assert.equal(r.y,350)});
+test('death is emitted once',()=>{const r=new Run(1);r.y=659;r.step(1/120);r.end('again');for(let i=0;i<50;i++)r.step(1/120);assert.equal(r.drain().filter(e=>e.type==='over').length,1)});
+test('fish awarded once; temporary entities removed',()=>{const r=new Run(1);r.items=[{x:C.x,y:r.y,kind:'fish',taken:false}];r.step(1/120);assert.equal(r.fish,1);assert.equal(r.score,3);r.step(1/120);assert.equal(r.fish,1);assert.equal(r.items.length,0)});
+test('five hazards preserve the declared flight corridor across 100 seeds',()=>{for(let s=0;s<100;s++){const r=new Run(s);for(let i=0;i<100;i++){r.spawn();const g=r.gates.at(-1);assert.ok(g.gap>=184);for(let y=g.center-g.gap/2+20;y<g.center+g.gap/2-20;y+=20){assert.ok(r.shapes(g).every(h=>CatDistance(g.x+30,y,h)>=C.r))}}assert.deepEqual([...new Set(r.gates.map(g=>g.type))],TYPES)}});
+function CatDistance(x,y,h){return require('../src/core.js').rectDistance(x,y,h)}
+test('same seed reproduces same sequence',()=>{const a=new Run(5),b=new Run(5);for(let i=0;i<30;i++){a.spawn();b.spawn()}assert.deepEqual(a.gates,b.gates)});
+test('every lethal hazard causes a real collision',()=>{for(const type of TYPES.slice(0,5)){const r=new Run(8);r.gates=[{x:C.x,center:350,gap:208,type,age:0}];const shape=r.shapes(r.gates[0])[0];r.y=shape.y+shape.h/2;r.step(1/120);assert.equal(r.state,'over',type)}});

@@ -1,0 +1,201 @@
+/* DOM menus and input; a single animation loop drives the pure simulation. */
+(function(){
+'use strict';
+const $=s=>document.querySelector(s),{C,Run,ROSTER}=CatCore,canvas=$('#game');
+const renderer=new CatArt.Renderer(canvas),audio=new CatAudio();
+let storage;try{storage=localStorage}catch{}
+const store=new CatSave.Store(storage),save=store.data,params=new URLSearchParams(location.search);
+renderer.c.scale(2,2);
+let run=null,mode='menu',acc=0,last=0,toastTime=0,selected=save.selected,daily='',report=null,trainer=null;
+function applySettings(){
+ audio.volume=save.settings.mute?0:save.settings.fx;
+ audio.music=save.settings.mute?0:save.settings.music;
+ renderer.motion=save.settings.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
+ $('#sound').textContent=save.settings.mute?'Sound off':'Sound on';
+}
+function button(text,action,cls='secondary'){const b=document.createElement('button');b.textContent=text;b.className=cls;b.onclick=()=>action();return b}
+function show(html){const s=$('#screen');s.className='screen';s.innerHTML='<div class="panel">'+html+'</div>';return s.firstElementChild}
+function note(p,text){const n=document.createElement('p');n.textContent=text;p.append(n)}
+function menu(){
+ mode='menu';run=null;trainer=null;$('#lesson').hidden=true;$('#toast').textContent='';daily='';$('#hud').hidden=true;$('#live-controls').hidden=true;updateCat();
+ const p=show('<span class="eyebrow">THE SKY IS NOT READY</span><h2>cat-astrophe!</h2><canvas class="menu-cat" width="600" height="260"></canvas><p>Tiny paws. Terrible decisions.<br>How far can you fly before it all goes wrong?</p><div class="meta"><span><b>'+save.best+'</b>PERSONAL BEST</span><span><b>'+save.balance+'</b>FISH BANK</span></div>');
+ p.append(button(save.walkthroughComplete?'Let’s cause trouble  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
+ if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
+ const row=document.createElement('div');row.className='menu-row';
+ row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));p.append(row);
+ note(p,'SPACE / ↑ / TAP TO FLAP · X FOR ABILITY');
+}
+function collection(){
+ mode='collection';const p=show('<span class="eyebrow">FISH BANK · '+save.balance+'</span><h2>A questionable<br>crew.</h2><canvas class="menu-cat" width="600" height="260"></canvas><div class="roster"></div>');
+ for(const [id,cat]of Object.entries(ROSTER)){
+  const owned=save.unlocked.includes(id);
+  const b=button(cat.name+(owned?selected===id?' · flying':' · select':' · unlock for '+cat.cost+' fish'),()=>{
+   if(owned){store.selectCat(id);selected=id;updateCat()}else if(store.buyCat(id))audio.play('unlock');
+   collection();
+  },selected===id?'selected':'');
+  b.disabled=!owned&&save.balance<cat.cost;
+  const preview=document.createElement('canvas');preview.className='cat-thumb';preview.dataset.cat=id;preview.width=180;preview.height=140;preview.setAttribute('aria-label',cat.name+' appearance');b.prepend(preview);
+  const small=document.createElement('small');small.textContent=cat.trait;b.append(small);p.querySelector('.roster').append(b);
+ }
+ p.append(button('Back to flight',menu));
+}
+function updateCat(){
+ const c=ROSTER[run?.cat||selected];$('#cat-name').textContent=c.name;$('#cat-tag').textContent=c.title;$('#cat-description').textContent=c.description;
+ $('#portrait').setAttribute('aria-label','Animated preview of '+c.name);
+}
+function closet(){
+ mode='closet';const p=show('<span class="eyebrow">'+save.balance+' FISH · '+save.tokens+' YARN TOKENS</span><h2>Dress for<br>the disaster.</h2><canvas class="menu-cat" width="600" height="260"></canvas><div class="roster"></div>');
+ for(const [id,label,cost]of [['none','Birthday suit','Free'],['goggles','Aviator goggles','15 fish'],['crown','Cardboard crown','3 yarn tokens']]){
+  const owned=save.outfits.includes(id),b=button(label+(owned?' · '+(save.outfit===id?'wearing':'equip'):' · '+cost),()=>{
+   if(owned){save.outfit=id;store.write()}else if(store.buyOutfit(id))audio.play('unlock');closet();
+  });b.disabled=!owned&&(id==='crown'?save.tokens<3:save.balance<15);p.querySelector('.roster').append(b);
+ }p.append(button('Back',menu));
+}
+function missions(){
+ mode='missions';const p=show('<span class="eyebrow">LITTLE GOALS. BIG CAT ENERGY.</span><h2>Flight plans.</h2>');
+ for(const m of CatSave.MISSIONS.filter(m=>!save.missions.includes(m.id)).slice(0,3)){
+  const d=document.createElement('div');d.className='mission';const n=Math.min(m.goal,save.totals[m.stat]);
+  d.innerHTML='<b>'+m.title+'</b><br>'+m.text+'<br>'+n+' / '+m.goal+' · reward '+m.reward+' fish<progress value="'+n+'" max="'+m.goal+'"></progress>';p.append(d);
+ }
+ if(save.missions.length===CatSave.MISSIONS.length)note(p,'All missions complete. An accomplished menace.');
+ note(p,save.missions.length+' missions complete · '+save.achievements.length+' achievements');
+ if(save.achievements.length)note(p,save.achievements.map(a=>a.replaceAll('-',' ')).join(' · '));
+ note(p,'Daily best: '+(save.daily[CatSave.dailyKey()]||0));p.append(button('Back',menu));
+}
+function settings(back){
+ mode='settings';const p=show('<span class="eyebrow">ADJUST THE CHAOS</span><h2>Creature comforts.</h2>');
+ for(const [key,label]of [['fx','Sound effects'],['music','Music']]){
+  const l=document.createElement('label');l.className='setting';l.textContent=label;
+  const input=document.createElement('input');input.type='range';input.min=0;input.max=1;input.step=.05;input.value=save.settings[key];
+  input.oninput=()=>{save.settings[key]=+input.value;applySettings();store.write()};l.append(input);p.append(l);
+ }
+ for(const [key,label]of [['mute','Mute all audio'],['motion','Particles and motion effects']]){
+  const l=document.createElement('label');l.className='setting';const input=document.createElement('input');input.type='checkbox';input.checked=save.settings[key];
+  input.onchange=()=>{save.settings[key]=input.checked;applySettings();store.write()};l.append(input,' '+label);p.append(l);
+ }
+ if(!store.available)note(p,'Browser storage is unavailable. Progress lasts for this session.');
+ p.append(button('Back',back));if(params.has('dev'))p.append(button('Flight lab',lab));
+}
+function start(isDaily=!!daily){
+ trainer=null;$('#lesson').hidden=true;$('#toast').textContent='';
+ audio.init();daily=isDaily?CatSave.dailyKey():'';
+ const seed=params.has('seed')?Number(params.get('seed'))>>>0:Date.now()>>>0;
+ run=new Run(daily?CatSave.dailySeed(daily):seed,daily?'biscuit':selected);
+ run.outfit=save.outfit;report=null;mode='playing';acc=0;last=0;toastTime=0;
+ $('#screen').className='screen empty';$('#hud').hidden=false;$('#live-controls').hidden=false;
+ renderer.particles=[];run.flap();updateCat();canvas.focus();
+}
+function startWalkthrough(){
+ start(false);run=new Run(17,'biscuit');run.outfit=save.outfit;trainer=new CatTraining.Walkthrough(run);
+ $('#lesson').hidden=false;updateCat();canvas.focus();updateLesson();
+}
+function updateLesson(){
+ if(!trainer)return;const step=CatTraining.STEPS[trainer.stage];
+ $('#lesson-title').textContent=step?.title||'CLEARED FOR TAKEOFF';
+ $('#lesson-text').textContent=trainer.hint;
+ $('#lesson-progress').textContent=trainer.stage===0?Math.min(run.flaps,3)+' / 3 flaps':trainer.stage===1?Math.min(run.fish,3)+' / 3 fish':trainer.stage===2?'Pounce with X or the ability button':'Dodge the warned pigeon lane';
+}
+function graduated(){
+ save.walkthroughComplete=true;store.write();run.state='complete';mode='tutorial-done';
+ $('#lesson').hidden=true;$('#live-controls').hidden=true;
+ const p=show('<span class="eyebrow">WALKTHROUGH COMPLETE</span><h2>A licensed<br>little menace.</h2><p>You can flap, catch fish, pounce into trouble, and dodge the consequences.<br>Practice rewards stay in practice. Real flights bank your fish.</p>');
+ p.append(button('My first real flight  →',()=>start(false),'play'),button('Practice again',startWalkthrough),button('Main menu',menu));
+}
+function pausedMenu(){
+ mode='paused';const p=show('<span class="eyebrow">A TACTICAL NAP</span><h2>Chaos on hold.</h2><p>Your cat is contemplating its choices.</p>');
+ p.append(button('Resume flight',resume,'play'),button('Restart',()=>{if(run.tutorial)startWalkthrough();else start()}),button('Settings',()=>settings(pausedMenu)),button('Main menu',menu));
+}
+function pause(){
+ if(!run||!['playing','paused'].includes(run.state))return;
+ if(run.state==='paused'){if(mode==='paused')resume();else pausedMenu();return}
+ run.pause();pausedMenu();
+}
+function resume(){if(!run)return;run.state='playing';$('#screen').className='screen empty';mode='playing';acc=0;last=0;canvas.focus()}
+function over(){
+ mode='over';report=store.settle(run,daily);$('#live-controls').hidden=true;if(report?.newBest)audio.play('unlock');
+ const names={ground:'Gravity has filed a complaint.',ceiling:'The sky has a ceiling. Who knew?',laundry:'Defeated by a sock. A new low.',pigeon:'The pigeons are unionized.',vacuum:'The vacuum has won this round.',toast:'Officially toast.',fan:'A fan. Not a fan of you.',yarn:'A tangled relationship.'};
+ const p=show('<span class="eyebrow">'+(run.lab?'LAB FLIGHT · NO REWARDS':daily?'DAILY FLIGHT · '+daily:'FLIGHT REPORT')+'</span><h2>'+(report?.newBest?'A new record!':'One small bonk.')+'</h2><p>'+names[run.death]+'</p><div class="result-grid"><div><b>'+run.score+'</b>SCORE</div><div><b>'+save.best+'</b>BEST</div><div><b>'+run.fish+'</b>FISH '+(run.lab?'CAUGHT':'BANKED')+'</div><div><b>'+run.near+' / '+run.bestCombo+'×</b>NEAR MISSES / COMBO</div></div><p>'+run.passed+' disasters avoided. Absolutely no lessons learned.<br>Distance '+(run.stats.distance||0)+' · Passes '+run.stats.pass+' · Fish '+run.stats.fish+'<br>Dodges '+run.stats.near+' · Worlds '+run.stats.world+' · Events '+(run.stats.event||0)+' · Mischief '+(run.stats.mischief||0)+'<br>'+run.escapes+' tangles escaped · '+run.blocks+' boxes sacrificed.</p>');
+ if(run.mischief){
+  const m=run.mischief.counts,parts=[];
+  if(m.pots)parts.push(m.pots+' flowerpot'+(m.pots===1?'':'s')+' smashed');
+  if(m.toast)parts.push(m.toast+' toast'+(m.toast===1?'':'s')+' stolen');
+  if(m.bells)parts.push(m.bells+' bell'+(m.bells===1?'':'s')+' rung');
+  if(m.pigeons)parts.push(m.pigeons+' pigeon'+(m.pigeons===1?'':'s')+' outsmarted');
+  const crime=document.createElement('div');crime.className='crime-report';
+  crime.innerHTML='<b>YOUR CRIME REPORT</b>';const text=document.createElement('p');text.textContent=parts.length?parts.join(' · '):'No incidents filed. Suspiciously well behaved.';crime.append(text);p.append(crime);
+  note(p,'Mischief bonus: '+(run.stats.mischief||0)+' points');
+ }
+ if(report?.completed.length)note(p,report.completed.map(m=>'Mission: '+m.title+' (+'+m.reward+' fish)').join(' · '));
+ p.append(button('Again. For science.  →',()=>start(),'play'),button('Main menu',menu));
+}
+function lab(){
+ mode='lab';const p=show('<span class="eyebrow">DEVELOPER FLIGHT LAB · NO REWARDS</span><h2>Reproduce it.</h2><p>Controlled scenarios use the live simulation.</p>');
+ for(const scenario of ['near','yarn','box','magnet','nip','rescue','dream','kitchen','vacuum','mischief']){
+  p.append(button(scenario,()=>{
+   start(false);run.lab=true;run.next=1000;run.gates=[];run.items=[];run.vy=0;
+   if(scenario==='near')run.gates=[{id:0,x:C.x-68,center:428,gap:208,type:'laundry',age:0}];
+   if(scenario==='yarn')run.recover({type:'yarn'});
+   if(scenario==='box'){run.armor=8;run.recover({type:'toast',center:350,gap:200})}
+   if(scenario==='magnet'){run.magnet=7;run.items=[{x:C.x+90,y:run.y,kind:'gold'}]}
+   if(scenario==='nip')run.collect({kind:'nip'});
+   if(scenario==='rescue'){run.rescues=1;run.y=655}
+   if(scenario==='dream')run.world=2;
+   if(scenario==='kitchen')run.world=1;
+   if(scenario==='mischief'){run.charge=100;run.mischief.add('pot',C.x+85,run.y-25)}
+   if(scenario==='vacuum'){run.world=1;run.next=0;run.beginEncounter()}
+  }));
+ }p.append(button('Back',menu));
+}
+function flap(){if(mode==='playing')run.flap()}
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();flap()});
+document.addEventListener('keydown',e=>{
+ // Native form controls own their keys, including sliders and editable descendants.
+ if(e.target.closest('input,select,textarea,[contenteditable]:not([contenteditable="false"]),[role="slider"]'))return;
+ if(e.target.closest('button,a')&&['Space','ArrowUp'].includes(e.code))return;
+ if(['Space','ArrowUp'].includes(e.code)&&['playing','menu','over'].includes(mode)){e.preventDefault();if(e.repeat)return;if(mode==='playing')flap();else if(mode==='menu'){if(save.walkthroughComplete)start();else startWalkthrough()}else if(mode==='over')start()}
+ if(e.code==='KeyP'||e.code==='Escape'){e.preventDefault();pause()}
+ if(e.code==='KeyX'&&mode==='playing')run.ability();
+ if(e.code==='KeyD'&&params.has('dev'))renderer.debug=!renderer.debug;
+});
+$('#ability').onclick=()=>{if(mode==='playing'){run.ability();canvas.focus()}};
+$('#pause').onclick=pause;
+$('#skip-lesson').onclick=()=>start(false);
+$('.brand').onclick=e=>{e.preventDefault();menu()};
+$('#sound').onclick=()=>{audio.init();save.settings.mute=!save.settings.mute;applySettings();store.write()};
+window.addEventListener('storage',e=>{if(e.key!=='catastrophe-v1')return;store.sync();selected=save.selected;applySettings();if(mode==='menu')menu();else if(mode==='collection')collection();else if(mode==='closet')closet();else if(mode==='missions')missions()});
+window.addEventListener('blur',()=>{if(mode==='playing')pause()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&mode==='playing')pause()});
+function frame(ms){
+ const elapsed=last?Math.max(0,(ms-last)/1000):0;last=ms;
+ // Catch up ordinary slow frames; a long stall requires a deliberate resume.
+ if(elapsed>.5&&mode==='playing')pause();
+ const dt=Math.min(.5,elapsed);
+ if(mode==='playing'){
+  acc+=dt;while(acc>=1/120&&run.state==='playing'){run.step(1/120);trainer?.step(1/120);acc-=1/120;if(trainer?.complete){graduated();break}}
+  for(const e of run.drain()){
+   audio.play(e.type);if(e.type==='fish'||e.type==='mischief')renderer.burst(e.x??C.x,e.y??run.y,e.type);
+   if(e.type==='near'||e.type==='rescue')renderer.burst(C.x,run.y,e.type);
+   if(e.text){$('#toast').textContent=e.text;toastTime=e.type==='warning'?2.5:2}
+   if(e.type==='over')over();
+  }
+  if(trainer&&mode==='playing')updateLesson();
+  $('#score').textContent=run.score;$('#fish').textContent=run.fish;
+ }
+ $('#pause').disabled=!run||!['playing','paused'].includes(run.state);
+ if(run){
+  $('#charge').textContent=Math.floor(run.charge)+'%';
+  $('#ability').disabled=mode!=='playing'||run.charge<(run.cat==='pounce'?65:100)||run.cooldown>0;
+  $('#ability').firstChild.textContent=run.cat==='pounce'?'POUNCE ':'ZOOMIES ';
+  $('#effects').textContent=[run.armor>0?'BOX '+Math.ceil(run.armor)+'s':'',run.magnet>0?'MAGNET '+Math.ceil(run.magnet)+'s':'',run.nip>0?'CATNIP '+Math.ceil(run.nip)+'s':'',run.rescues?'♥ '+run.rescues:'',run.combo?'DODGE ×'+run.combo:''].filter(Boolean).join(' · ');
+ }
+ $('#lesson').hidden=!(trainer&&mode==='playing');
+ toastTime=Math.max(0,toastTime-dt);$('#toast').classList.toggle('show',toastTime>0&&mode==='playing'&&!run?.tutorial);
+ renderer.draw(run,ms/1000,mode==='playing'?dt:0);audio.update?.(dt,run?.world||0,mode==='playing');
+ const t=renderer.motion?ms/1000:0,c=$('#portrait').getContext('2d');
+ c.clearRect(0,0,360,260);c.save();c.translate(180,140);c.scale(2.3,2.3);CatArt.cat(c,0,Math.sin(t*2)*3,t,run?.cat||selected,'curious',1,0,save.outfit);c.restore();
+ const mc=$('.menu-cat');if(mc){const m=mc.getContext('2d');m.clearRect(0,0,600,260);m.save();m.translate(300,140);m.scale(2.4,2.4);CatArt.cat(m,0,Math.sin(t*2)*4,t,selected,'curious',1,0,save.outfit);m.restore()}
+ for(const thumb of document.querySelectorAll('.cat-thumb')){const c=thumb.getContext('2d');c.clearRect(0,0,180,140);c.save();c.translate(94,78);c.scale(1.5,1.5);CatArt.cat(c,0,Math.sin(t*2)*2,t,thumb.dataset.cat);c.restore()}
+ requestAnimationFrame(frame);
+}
+applySettings();updateCat();menu();requestAnimationFrame(frame);
+})();
