@@ -8,15 +8,15 @@ The game remains on Vercel. Neon hosts the PostgreSQL database; no server rental
 4. Open the Neon SQL editor for the connected production database and run `database/schema.sql` from this project. It is safe to rerun.
 5. Generate a signing secret locally: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Add the value as the server-only Vercel environment variable `LEADERBOARD_SECRET`. Do not commit the value.
 6. Commit and push the changes, including `api/`, `server/`, `database/`, `package-lock.json`, and the rebuilt game. Redeploy after adding environment variables. Existing `vercel.json` leaves `/api/leaderboard` available to the Vercel function.
-7. On the deployed site, open Global top 20. It should show an empty board. Play a real flight, enter a nickname on the flight report, and submit. Check the result from a second browser.
+7. On the deployed site, open Global top 100. It should show an empty board. Play a real flight, enter a nickname on the flight report, and submit. Check the result from a second browser.
 
 Production and preview deployments should use separate Neon branches/databases. Do not connect untrusted preview code to production credentials. For local full-stack testing, use Vercel CLI's `vercel dev` with server environment variables; `npm start` serves the offline game only.
 
 ## Behavior
 
 - Separate Classic all-time and Daily boards. Daily dates and game seeds use UTC, resetting at midnight UTC.
-- Each board retains its top 20 flights; repeat nicknames are allowed, and names are not authenticated identities. Ties favor earlier submissions.
-- Daily history is retained for 30 days. Submission IDs are retained for 25 hours to prevent replay even after scores fall out of the top 20. Tickets expire after 24 hours.
+- Each board retains its top 100 flights; repeat nicknames are allowed, and names are not authenticated identities. Ties favor earlier submissions.
+- Daily history is retained for 30 days. Submission IDs are retained for 25 hours to prevent replay even after scores fall out of the top 100. Tickets expire after 24 hours.
 - Nicknames are public, limited to 20 characters, and rendered as text. Do not enter personal information.
 - Requests to start/submit flights are limited to 20 per minute per hashed IP; raw IP addresses are not stored. SQL ranking/pruning is transactional and serialized.
 - Offline, unconfigured, or unavailable leaderboard service never blocks local play or progress. Practice and developer runs cannot submit through the game UI.

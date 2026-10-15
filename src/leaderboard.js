@@ -14,12 +14,12 @@ async function list(container,board,id){
  if(!data.rows.length){container.append(element('p','No scores yet. Be the first menace!'));return}
  const table=element('table');table.className='scoreboard';const header=element('tr');for(const title of ['Rank','Name','Score','Cat'])header.append(element('th',title));table.append(header);
  data.rows.forEach((row,i)=>{const tr=element('tr');if(row.id===id)tr.className='your-score';for(const value of [String(i+1),row.name,String(row.score),CatCore.ROSTER[row.cat]?.name||row.cat])tr.append(element('td',value));table.append(tr)});container.append(table);
- if(id&&!data.rows.some(r=>r.id===id))container.append(element('p','Score submitted. You haven’t reached the top 20 yet.'));
+ if(id&&!data.rows.some(r=>r.id===id))container.append(element('p','Score submitted. You haven’t reached the top 100 yet.'));
  }catch(e){if(container._load!==load)return;container.replaceChildren(element('p',e.message));const retry=element('button','Retry loading scores');retry.onclick=()=>list(container,board,id);container.append(retry)}
 }
 function ticket(board){return request({action:'start',board}).then(d=>({token:d.token})).catch(e=>({error:e.message}))}
 function mount(panel,run,board){
- const area=element('section');area.className='global-scores';area.append(element('h3','GLOBAL TOP 20'));
+ const area=element('section');area.className='global-scores';area.append(element('h3','GLOBAL TOP 100'));
  const form=element('form'),label=element('label','Your nickname'),input=element('input');input.maxLength=20;input.required=true;input.autocomplete='nickname';label.append(input);
  try{input.value=localStorage.getItem('catastrophe-nickname')||''}catch{}
  const submit=element('button','Submit score');submit.type='submit';const status=element('p');status.setAttribute('aria-live','polite');

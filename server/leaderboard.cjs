@@ -25,7 +25,7 @@ function createHandler({sql,secret}){return async(req,res)=>{
   if(!sql||!secret)return res.status(503).json({error:'Global scores are not connected yet. Your local progress is safe.'});
   if(req.method==='GET'){
    const board=req.query?.board==='daily'?'daily':'classic',date=board==='daily'?today():'all';
-   const rows=await sql`SELECT run_id AS id, name, score, cat FROM cat_scores WHERE board=${board} AND flight_date=${date} ORDER BY score DESC, created_at ASC, run_id ASC LIMIT 20`;
+   const rows=await sql`SELECT run_id AS id, name, score, cat FROM cat_scores WHERE board=${board} AND flight_date=${date} ORDER BY score DESC, created_at ASC, run_id ASC LIMIT 100`;
    return res.status(200).json({board,date,rows});
   }
   if(req.headers.origin&&req.headers.origin!==`https://${req.headers.host}`&&req.headers.origin!==`http://${req.headers.host}`)return res.status(403).json({error:'Invalid origin.'});

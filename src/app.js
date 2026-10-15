@@ -22,11 +22,11 @@ function menu(){
  p.append(button(save.walkthroughComplete?'Let’s cause trouble  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
  if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
  const row=document.createElement('div');row.className='menu-row';
- row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));p.append(row);if(rootBoard())p.append(button('Global top 20',leaderboard));
+ row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));p.append(row);if(rootBoard())p.append(button('Global top 100',leaderboard));
  note(p,'SPACE / ↑ / TAP TO FLAP · X FOR ABILITY');
 }
 function rootBoard(){return globalThis.CatBoard}
-function leaderboard(){mode='leaderboard';const p=show('<span class="eyebrow">THE WORLD’S BIGGEST MENACES</span><h2>Global top 20.</h2>'),scores=document.createElement('div');p.append(button('Classic',()=>CatBoard.list(scores,'classic')),button('Daily',()=>CatBoard.list(scores,'daily')),scores,button('Back',menu));CatBoard.list(scores,'classic')}
+function leaderboard(){mode='leaderboard';const p=show('<span class="eyebrow">THE WORLD’S BIGGEST MENACES</span><h2>Global top 100.</h2>'),scores=document.createElement('div');p.append(button('Classic',()=>CatBoard.list(scores,'classic')),button('Daily',()=>CatBoard.list(scores,'daily')),scores,button('Back',menu));CatBoard.list(scores,'classic')}
 function collection(){
  mode='collection';const p=show('<span class="eyebrow">FISH BANK · '+save.balance+'</span><h2>A questionable<br>crew.</h2><canvas class="menu-cat" width="600" height="260"></canvas><div class="roster"></div>');
  for(const [id,cat]of Object.entries(ROSTER)){

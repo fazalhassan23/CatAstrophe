@@ -19,14 +19,14 @@ BEGIN
 END $$;
 CREATE OR REPLACE FUNCTION cat_submit_score(r uuid,b text,d text,n text,s integer,c text) RETURNS boolean LANGUAGE plpgsql AS $$
 BEGIN
- -- Serialize ranking/pruning, so concurrent submissions cannot leave more than twenty.
+ -- Serialize ranking/pruning, so concurrent submissions cannot leave more than one hundred.
  PERFORM pg_advisory_xact_lock(734191);
  DELETE FROM cat_submissions WHERE created_at<now()-interval '25 hours';
  INSERT INTO cat_submissions(run_id) VALUES(r) ON CONFLICT DO NOTHING;
  IF NOT FOUND THEN RETURN false; END IF;
  INSERT INTO cat_scores(run_id,board,flight_date,name,score,cat) VALUES(r,b,d,n,s,c);
  DELETE FROM cat_scores WHERE board=b AND flight_date=d AND run_id NOT IN
- (SELECT run_id FROM cat_scores WHERE board=b AND flight_date=d ORDER BY score DESC,created_at ASC,run_id ASC LIMIT 20);
+ (SELECT run_id FROM cat_scores WHERE board=b AND flight_date=d ORDER BY score DESC,created_at ASC,run_id ASC LIMIT 100);
  DELETE FROM cat_scores WHERE board='daily' AND flight_date<to_char(now() AT TIME ZONE 'UTC'-interval '30 days','YYYY-MM-DD');
  RETURN true;
 END $$;

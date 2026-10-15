@@ -76,4 +76,4 @@ See `DEVELOPMENT.md` for phase-by-phase tests and remaining content. This is the
 
 ## Global leaderboard — v0.3.0
 
-Online deployments support Classic and UTC Daily top-20 boards with nickname entry after a flight. Follow `LEADERBOARD-SETUP.md` to connect Neon and initialize the database. Offline play still works. Lives pickups and deductions now consistently honor protection at both obstacles and world boundaries; the HUD shows remaining rescues out of two. Validation: 66 tests pass, including embedded PostgreSQL schema tests and leaderboard UI/API checks.
+Online deployments support Classic and UTC Daily top-100 boards with nickname entry after a flight. Follow `LEADERBOARD-SETUP.md` to connect Neon and initialize the database. Offline play still works. Lives pickups and deductions now consistently honor protection at both obstacles and world boundaries; the HUD shows remaining rescues out of two. Validation: 66 tests pass, including embedded PostgreSQL schema tests and leaderboard UI/API checks.
