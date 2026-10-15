@@ -22,9 +22,11 @@ function menu(){
  p.append(button(save.walkthroughComplete?'Let’s cause trouble  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
  if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
  const row=document.createElement('div');row.className='menu-row';
- row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));p.append(row);
+ row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));p.append(row);if(rootBoard())p.append(button('Global top 20',leaderboard));
  note(p,'SPACE / ↑ / TAP TO FLAP · X FOR ABILITY');
 }
+function rootBoard(){return globalThis.CatBoard}
+function leaderboard(){mode='leaderboard';const p=show('<span class="eyebrow">THE WORLD’S BIGGEST MENACES</span><h2>Global top 20.</h2>'),scores=document.createElement('div');p.append(button('Classic',()=>CatBoard.list(scores,'classic')),button('Daily',()=>CatBoard.list(scores,'daily')),scores,button('Back',menu));CatBoard.list(scores,'classic')}
 function collection(){
  mode='collection';const p=show('<span class="eyebrow">FISH BANK · '+save.balance+'</span><h2>A questionable<br>crew.</h2><canvas class="menu-cat" width="600" height="260"></canvas><div class="roster"></div>');
  for(const [id,cat]of Object.entries(ROSTER)){
@@ -76,17 +78,18 @@ function settings(back){
  if(!store.available)note(p,'Browser storage is unavailable. Progress lasts for this session.');
  p.append(button('Back',back));if(params.has('dev'))p.append(button('Flight lab',lab));
 }
-function start(isDaily=!!daily){
+function start(isDaily=!!daily,practice=false){
  trainer=null;$('#lesson').hidden=true;$('#toast').textContent='';
  audio.init();daily=isDaily?CatSave.dailyKey():'';
  const seed=params.has('seed')?Number(params.get('seed'))>>>0:Date.now()>>>0;
  run=new Run(daily?CatSave.dailySeed(daily):seed,daily?'biscuit':selected);
+ if(rootBoard()&&!practice&&!params.has('dev'))run.onlineTicket=CatBoard.ticket(daily?'daily':'classic');
  run.outfit=save.outfit;report=null;mode='playing';acc=0;last=0;toastTime=0;
  $('#screen').className='screen empty';$('#hud').hidden=false;$('#live-controls').hidden=false;
  renderer.particles=[];run.flap();updateCat();canvas.focus();
 }
 function startWalkthrough(){
- start(false);run=new Run(17,'biscuit');run.outfit=save.outfit;trainer=new CatTraining.Walkthrough(run);
+ start(false,true);run=new Run(17,'biscuit');run.outfit=save.outfit;trainer=new CatTraining.Walkthrough(run);
  $('#lesson').hidden=false;updateCat();canvas.focus();updateLesson();
 }
 function updateLesson(){
@@ -126,6 +129,7 @@ function over(){
   note(p,'Mischief bonus: '+(run.stats.mischief||0)+' points');
  }
  if(report?.completed.length)note(p,report.completed.map(m=>'Mission: '+m.title+' (+'+m.reward+' fish)').join(' · '));
+ if(rootBoard()&&!run.lab&&!run.tutorial&&!params.has('dev'))CatBoard.mount(p,run,daily?'daily':'classic');
  p.append(button('Again. For science.  →',()=>start(),'play'),button('Main menu',menu));
 }
 function lab(){
@@ -186,7 +190,7 @@ function frame(ms){
   $('#charge').textContent=Math.floor(run.charge)+'%';
   $('#ability').disabled=mode!=='playing'||run.charge<(run.cat==='pounce'?65:100)||run.cooldown>0;
   $('#ability').firstChild.textContent=run.cat==='pounce'?'POUNCE ':'ZOOMIES ';
-  $('#effects').textContent=[run.armor>0?'BOX '+Math.ceil(run.armor)+'s':'',run.magnet>0?'MAGNET '+Math.ceil(run.magnet)+'s':'',run.nip>0?'CATNIP '+Math.ceil(run.nip)+'s':'',run.rescues?'♥ '+run.rescues:'',run.combo?'DODGE ×'+run.combo:''].filter(Boolean).join(' · ');
+  $('#effects').textContent=[run.armor>0?'BOX '+Math.ceil(run.armor)+'s':'',run.magnet>0?'MAGNET '+Math.ceil(run.magnet)+'s':'',run.nip>0?'CATNIP '+Math.ceil(run.nip)+'s':'','♥ '+run.rescues+' / 2',run.combo?'DODGE ×'+run.combo:''].filter(Boolean).join(' · ');
  }
  $('#lesson').hidden=!(trainer&&mode==='playing');
  toastTime=Math.max(0,toastTime-dt);$('#toast').classList.toggle('show',toastTime>0&&mode==='playing'&&!run?.tutorial);

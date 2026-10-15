@@ -21,7 +21,7 @@ class Run{
   if(f.kind==='box'){this.armor=8;this.emit('power',{text:'CARDBOARD ARMOR · 8s · one impact'});return}
   if(f.kind==='nip'){this.nip=8;this.charge=100;this.emit('power',{text:'CATNIP RUSH · 8s · double fish + Zoomies ready'});return}
   if(f.kind==='magnet'){this.magnet=7;this.emit('power',{text:'FISH MAGNET · 7s · nearby fish come to you'});return}
-  if(f.kind==='life'){this.rescues=Math.min(2,this.rescues+1);this.emit('power',{text:'EXTRA RESCUE · one automatic air bounce'});return}
+  if(f.kind==='life'){const full=this.rescues===2;this.rescues=Math.min(2,this.rescues+1);this.emit('power',{text:full?'RESCUES FULL · 2 / 2':'EXTRA RESCUE · '+this.rescues+' / 2 automatic air bounces'});return}
   if(f.kind==='yarn'){this.tokens++;this.emit('power',{text:'YARN TOKEN · for your outfit closet'});return}
   const base=f.kind==='gold'?5:f.kind==='mystery'?1+Math.floor(this.rewardRand()*4):1,n=base*(this.nip>0?2:1);this.fish+=n;this.score+=n*3;this.stats.fish+=n*3;this.charge=clamp(this.charge+12,0,100);this.moodSet('excited');this.emit('fish',{x:f.x,y:f.y})}
  pause(){if(this.state==='playing')this.state='paused';else if(this.state==='paused')this.state='playing'}
@@ -73,7 +73,7 @@ class Run{
   }
   for(const f of this.items){f.x-=dx;const d=Math.hypot(f.x-C.x,f.y-this.y);if(this.magnet>0&&['fish','gold','mystery'].includes(f.kind)&&d<155&&d>1){const pull=Math.min(1,dt*6);f.x+=(C.x-f.x)*pull;f.y+=(this.y-f.y)*pull}if(d<C.r+12)this.collect(f)}
   this.mischief?.step(dt,dx);if(this.state!=='playing')return;
-  if(this.y<C.r+45){if(!this.rescue())this.end('ceiling')}if(this.y>C.floor-C.r){if(!this.rescue())this.end('ground')}
+  if(this.y<C.r+45||this.y>C.floor-C.r){const reason=this.y<C.r+45?'ceiling':'ground';if(this.invuln>0){this.y=clamp(this.y,C.r+45,C.floor-C.r);this.vy=reason==='ceiling'?100:-130}else if(!this.rescue())this.end(reason)}
   this.gates=this.gates.filter(g=>g.x>-160);this.items=this.items.filter(f=>f.x>-30&&!f.taken);
  }
 }

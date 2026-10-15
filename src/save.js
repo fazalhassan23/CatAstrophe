@@ -30,7 +30,7 @@ class Store{
  buyOutfit(id){this.sync();const d=this.data;if(d.outfits.includes(id)||!['goggles','crown'].includes(id))return false;const currency=id==='crown'?'tokens':'balance',cost=id==='crown'?3:15;if(d[currency]<cost)return false;d[currency]-=cost;d.outfits.push(id);d.outfit=id;this.write();return true}
  settle(run,daily=''){if(run.lab||run.tutorial||run.state!=='over'||this.credited.has(run))return null;this.credited.add(run);this.sync();const d=this.data,newBest=run.score>d.best;d.best=Math.max(d.best,run.score);d.balance+=run.fish;d.tokens+=run.tokens;d.totals.runs++;d.totals.fish+=run.fish;d.totals.near+=run.near;d.totals.worlds+=Math.floor(run.passed/6);d.totals.escapes+=run.escapes;d.totals.dashes+=run.dashes;const completed=[];for(const m of MISSIONS)if(!d.missions.includes(m.id)&&d.totals[m.stat]>=m.goal){d.missions.push(m.id);d.balance+=m.reward;completed.push(m)}for(const [id,yes]of [['first-flight',true],['minute-menace',run.time>=60],['combo-three',run.bestCombo>=3],['world-tour',run.passed>=12],['no-rescue',run.passed>=6&&run.usedRescues===0]])if(yes&&!d.achievements.includes(id))d.achievements.push(id);if(daily)d.daily[daily]=Math.max(d.daily[daily]||0,run.score);this.write();return{newBest,completed}}
 }
-function dailyKey(){return new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
+function dailyKey(){return new Date().toISOString().slice(0,10)}
 function dailySeed(key){return [...key].reduce((a,c)=>Math.imul(a^c.charCodeAt(0),16777619)>>>0,2166136261)}
 root.CatSave={Store,normalize,defaults,MISSIONS,dailyKey,dailySeed};if(typeof module!=='undefined')module.exports=root.CatSave;
 })(globalThis);

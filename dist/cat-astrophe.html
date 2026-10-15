@@ -5,6 +5,8 @@
 .lesson{position:absolute;z-index:4;top:75px;left:15px;right:15px;padding:13px 15px;border:1px solid #9ab5a4;background:#fff9e9f2;border-radius:13px;pointer-events:none;box-shadow:0 4px 15px #304b3e10}.lesson>span{font-size:11px;font-weight:800;color:#386659}.lesson p{margin:7px 0;font-size:11px;line-height:1.5;color:#4e695c}.lesson-progress{font-size:10px;font-weight:bold;color:#a76a47}.lesson button{pointer-events:auto;background:transparent;border:0;text-decoration:underline;color:#647b6c;font-size:10px;padding:8px 0 0;min-height:44px}.crime-report{text-align:left;background:#f0ead8;border:1px dashed #c6b08b;border-radius:10px;padding:12px;margin:10px 0}.crime-report b{font-size:9px;letter-spacing:1.5px;color:#97694e}.crime-report p{font-size:11px!important;margin:6px 0!important}
 @media(max-width:800px){.lesson{top:62px;padding:10px 12px}.lesson p{font-size:10px}.lesson button{padding:4px 0 0}.menu-cat{height:65px;width:150px;margin-inline:auto}.panel h2{font-size:30px}.panel p{margin:6px 0 9px}.menu-row .secondary{padding:8px 10px}}
 
+
+.global-scores{margin-top:20px;border-top:1px solid #c9bda5;padding-top:16px}.global-scores label{display:block;text-align:left}.global-scores input{display:block;box-sizing:border-box;width:100%;font:inherit;padding:10px;margin:8px 0;border:1px solid #887b66;border-radius:8px}.scoreboard{width:100%;border-collapse:collapse;font-size:12px;margin:12px 0}.scoreboard th,.scoreboard td{padding:8px 4px;border-bottom:1px solid #d9cfb8;text-align:left;overflow-wrap:anywhere}.your-score{background:#e5d19a}
 </style></head>
 <body>
 <header class="masthead"><a class="brand" href="#" aria-label="CAT-ASTROPHE home">cat-astrophe<span>!</span></a><span class="edition">A SMALL GAME ABOUT BIG CAT ENERGY</span><button id="sound" class="quiet" aria-label="Toggle sound">Sound on</button></header>
@@ -44,7 +46,7 @@ class Run{
   if(f.kind==='box'){this.armor=8;this.emit('power',{text:'CARDBOARD ARMOR · 8s · one impact'});return}
   if(f.kind==='nip'){this.nip=8;this.charge=100;this.emit('power',{text:'CATNIP RUSH · 8s · double fish + Zoomies ready'});return}
   if(f.kind==='magnet'){this.magnet=7;this.emit('power',{text:'FISH MAGNET · 7s · nearby fish come to you'});return}
-  if(f.kind==='life'){this.rescues=Math.min(2,this.rescues+1);this.emit('power',{text:'EXTRA RESCUE · one automatic air bounce'});return}
+  if(f.kind==='life'){const full=this.rescues===2;this.rescues=Math.min(2,this.rescues+1);this.emit('power',{text:full?'RESCUES FULL · 2 / 2':'EXTRA RESCUE · '+this.rescues+' / 2 automatic air bounces'});return}
   if(f.kind==='yarn'){this.tokens++;this.emit('power',{text:'YARN TOKEN · for your outfit closet'});return}
   const base=f.kind==='gold'?5:f.kind==='mystery'?1+Math.floor(this.rewardRand()*4):1,n=base*(this.nip>0?2:1);this.fish+=n;this.score+=n*3;this.stats.fish+=n*3;this.charge=clamp(this.charge+12,0,100);this.moodSet('excited');this.emit('fish',{x:f.x,y:f.y})}
  pause(){if(this.state==='playing')this.state='paused';else if(this.state==='paused')this.state='playing'}
@@ -96,7 +98,7 @@ class Run{
   }
   for(const f of this.items){f.x-=dx;const d=Math.hypot(f.x-C.x,f.y-this.y);if(this.magnet>0&&['fish','gold','mystery'].includes(f.kind)&&d<155&&d>1){const pull=Math.min(1,dt*6);f.x+=(C.x-f.x)*pull;f.y+=(this.y-f.y)*pull}if(d<C.r+12)this.collect(f)}
   this.mischief?.step(dt,dx);if(this.state!=='playing')return;
-  if(this.y<C.r+45){if(!this.rescue())this.end('ceiling')}if(this.y>C.floor-C.r){if(!this.rescue())this.end('ground')}
+  if(this.y<C.r+45||this.y>C.floor-C.r){const reason=this.y<C.r+45?'ceiling':'ground';if(this.invuln>0){this.y=clamp(this.y,C.r+45,C.floor-C.r);this.vy=reason==='ceiling'?100:-130}else if(!this.rescue())this.end(reason)}
   this.gates=this.gates.filter(g=>g.x>-160);this.items=this.items.filter(f=>f.x>-30&&!f.taken);
  }
 }
@@ -198,7 +200,7 @@ class Store{
  buyOutfit(id){this.sync();const d=this.data;if(d.outfits.includes(id)||!['goggles','crown'].includes(id))return false;const currency=id==='crown'?'tokens':'balance',cost=id==='crown'?3:15;if(d[currency]<cost)return false;d[currency]-=cost;d.outfits.push(id);d.outfit=id;this.write();return true}
  settle(run,daily=''){if(run.lab||run.tutorial||run.state!=='over'||this.credited.has(run))return null;this.credited.add(run);this.sync();const d=this.data,newBest=run.score>d.best;d.best=Math.max(d.best,run.score);d.balance+=run.fish;d.tokens+=run.tokens;d.totals.runs++;d.totals.fish+=run.fish;d.totals.near+=run.near;d.totals.worlds+=Math.floor(run.passed/6);d.totals.escapes+=run.escapes;d.totals.dashes+=run.dashes;const completed=[];for(const m of MISSIONS)if(!d.missions.includes(m.id)&&d.totals[m.stat]>=m.goal){d.missions.push(m.id);d.balance+=m.reward;completed.push(m)}for(const [id,yes]of [['first-flight',true],['minute-menace',run.time>=60],['combo-three',run.bestCombo>=3],['world-tour',run.passed>=12],['no-rescue',run.passed>=6&&run.usedRescues===0]])if(yes&&!d.achievements.includes(id))d.achievements.push(id);if(daily)d.daily[daily]=Math.max(d.daily[daily]||0,run.score);this.write();return{newBest,completed}}
 }
-function dailyKey(){return new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
+function dailyKey(){return new Date().toISOString().slice(0,10)}
 function dailySeed(key){return [...key].reduce((a,c)=>Math.imul(a^c.charCodeAt(0),16777619)>>>0,2166136261)}
 root.CatSave={Store,normalize,defaults,MISSIONS,dailyKey,dailySeed};if(typeof module!=='undefined')module.exports=root.CatSave;
 })(globalThis);
@@ -307,6 +309,39 @@ class Renderer{
 }
 root.CatArt={Renderer,cat,fish,rr,palettes};
 })(globalThis);
+</script><script>/* Optional online scores. Offline failures never interrupt a flight. */
+(function(root){
+async function request(body,board='classic'){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+ try{const response=await fetch('/api/leaderboard'+(body?'':'?board='+board),{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined,signal:controller.signal});let data;try{data=await response.json()}catch{throw Error('Global scores need the online Vercel build.')}
+ if(!response.ok)throw Error(data.error||'Global scores are unavailable.');return data;
+ }finally{clearTimeout(timer)}
+}
+function element(tag,text){const e=document.createElement(tag);if(text)e.textContent=text;return e}
+async function list(container,board,id){
+ const load=container._load=(container._load||0)+1;container.replaceChildren(element('p','Loading global scores…'));
+ try{const data=await request(null,board);if(container._load!==load)return;container.replaceChildren();
+ container.append(element('p',board==='daily'?'Daily · '+data.date+' · resets at midnight UTC':'Classic · all time'));
+ if(!data.rows.length){container.append(element('p','No scores yet. Be the first menace!'));return}
+ const table=element('table');table.className='scoreboard';const header=element('tr');for(const title of ['Rank','Name','Score','Cat'])header.append(element('th',title));table.append(header);
+ data.rows.forEach((row,i)=>{const tr=element('tr');if(row.id===id)tr.className='your-score';for(const value of [String(i+1),row.name,String(row.score),CatCore.ROSTER[row.cat]?.name||row.cat])tr.append(element('td',value));table.append(tr)});container.append(table);
+ if(id&&!data.rows.some(r=>r.id===id))container.append(element('p','Score submitted. You haven’t reached the top 20 yet.'));
+ }catch(e){if(container._load!==load)return;container.replaceChildren(element('p',e.message));const retry=element('button','Retry loading scores');retry.onclick=()=>list(container,board,id);container.append(retry)}
+}
+function ticket(board){return request({action:'start',board}).then(d=>({token:d.token})).catch(e=>({error:e.message}))}
+function mount(panel,run,board){
+ const area=element('section');area.className='global-scores';area.append(element('h3','GLOBAL TOP 20'));
+ const form=element('form'),label=element('label','Your nickname'),input=element('input');input.maxLength=20;input.required=true;input.autocomplete='nickname';label.append(input);
+ try{input.value=localStorage.getItem('catastrophe-nickname')||''}catch{}
+ const submit=element('button','Submit score');submit.type='submit';const status=element('p');status.setAttribute('aria-live','polite');
+ form.append(label,submit);area.append(form,status);const scores=element('div');area.append(scores);panel.append(area);list(scores,board);
+ form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;status.textContent='Submitting…';
+ try{const t=await run.onlineTicket;if(!t?.token)throw Error(t?.error||'This flight has no online ticket. Start a new flight to submit.');const name=input.value.trim();const data=await request({token:t.token,name,score:run.score,seconds:run.time,cat:run.cat});try{localStorage.setItem('catastrophe-nickname',name)}catch{}status.textContent=data.accepted?'Score submitted!':'This flight was already submitted.';input.disabled=true;submit.textContent='Submitted';await list(scores,board,data.id)}
+ catch(err){status.textContent=err.message;submit.disabled=false}
+ };
+}
+root.CatBoard={ticket,list,mount};
+})(globalThis);
 </script><script>/* DOM menus and input; a single animation loop drives the pure simulation. */
 (function(){
 'use strict';
@@ -331,9 +366,11 @@ function menu(){
  p.append(button(save.walkthroughComplete?'Let’s cause trouble  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
  if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
  const row=document.createElement('div');row.className='menu-row';
- row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));p.append(row);
+ row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));p.append(row);if(rootBoard())p.append(button('Global top 20',leaderboard));
  note(p,'SPACE / ↑ / TAP TO FLAP · X FOR ABILITY');
 }
+function rootBoard(){return globalThis.CatBoard}
+function leaderboard(){mode='leaderboard';const p=show('<span class="eyebrow">THE WORLD’S BIGGEST MENACES</span><h2>Global top 20.</h2>'),scores=document.createElement('div');p.append(button('Classic',()=>CatBoard.list(scores,'classic')),button('Daily',()=>CatBoard.list(scores,'daily')),scores,button('Back',menu));CatBoard.list(scores,'classic')}
 function collection(){
  mode='collection';const p=show('<span class="eyebrow">FISH BANK · '+save.balance+'</span><h2>A questionable<br>crew.</h2><canvas class="menu-cat" width="600" height="260"></canvas><div class="roster"></div>');
  for(const [id,cat]of Object.entries(ROSTER)){
@@ -385,17 +422,18 @@ function settings(back){
  if(!store.available)note(p,'Browser storage is unavailable. Progress lasts for this session.');
  p.append(button('Back',back));if(params.has('dev'))p.append(button('Flight lab',lab));
 }
-function start(isDaily=!!daily){
+function start(isDaily=!!daily,practice=false){
  trainer=null;$('#lesson').hidden=true;$('#toast').textContent='';
  audio.init();daily=isDaily?CatSave.dailyKey():'';
  const seed=params.has('seed')?Number(params.get('seed'))>>>0:Date.now()>>>0;
  run=new Run(daily?CatSave.dailySeed(daily):seed,daily?'biscuit':selected);
+ if(rootBoard()&&!practice&&!params.has('dev'))run.onlineTicket=CatBoard.ticket(daily?'daily':'classic');
  run.outfit=save.outfit;report=null;mode='playing';acc=0;last=0;toastTime=0;
  $('#screen').className='screen empty';$('#hud').hidden=false;$('#live-controls').hidden=false;
  renderer.particles=[];run.flap();updateCat();canvas.focus();
 }
 function startWalkthrough(){
- start(false);run=new Run(17,'biscuit');run.outfit=save.outfit;trainer=new CatTraining.Walkthrough(run);
+ start(false,true);run=new Run(17,'biscuit');run.outfit=save.outfit;trainer=new CatTraining.Walkthrough(run);
  $('#lesson').hidden=false;updateCat();canvas.focus();updateLesson();
 }
 function updateLesson(){
@@ -435,6 +473,7 @@ function over(){
   note(p,'Mischief bonus: '+(run.stats.mischief||0)+' points');
  }
  if(report?.completed.length)note(p,report.completed.map(m=>'Mission: '+m.title+' (+'+m.reward+' fish)').join(' · '));
+ if(rootBoard()&&!run.lab&&!run.tutorial&&!params.has('dev'))CatBoard.mount(p,run,daily?'daily':'classic');
  p.append(button('Again. For science.  →',()=>start(),'play'),button('Main menu',menu));
 }
 function lab(){
@@ -495,7 +534,7 @@ function frame(ms){
   $('#charge').textContent=Math.floor(run.charge)+'%';
   $('#ability').disabled=mode!=='playing'||run.charge<(run.cat==='pounce'?65:100)||run.cooldown>0;
   $('#ability').firstChild.textContent=run.cat==='pounce'?'POUNCE ':'ZOOMIES ';
-  $('#effects').textContent=[run.armor>0?'BOX '+Math.ceil(run.armor)+'s':'',run.magnet>0?'MAGNET '+Math.ceil(run.magnet)+'s':'',run.nip>0?'CATNIP '+Math.ceil(run.nip)+'s':'',run.rescues?'♥ '+run.rescues:'',run.combo?'DODGE ×'+run.combo:''].filter(Boolean).join(' · ');
+  $('#effects').textContent=[run.armor>0?'BOX '+Math.ceil(run.armor)+'s':'',run.magnet>0?'MAGNET '+Math.ceil(run.magnet)+'s':'',run.nip>0?'CATNIP '+Math.ceil(run.nip)+'s':'','♥ '+run.rescues+' / 2',run.combo?'DODGE ×'+run.combo:''].filter(Boolean).join(' · ');
  }
  $('#lesson').hidden=!(trainer&&mode==='playing');
  toastTime=Math.max(0,toastTime-dt);$('#toast').classList.toggle('show',toastTime>0&&mode==='playing'&&!run?.tutorial);

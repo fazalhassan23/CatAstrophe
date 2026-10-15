@@ -73,3 +73,7 @@ Open `http://127.0.0.1:4173/?dev=1`. Settings → Flight lab exposes reproducibl
 ## Validation and limits
 
 See `DEVELOPMENT.md` for phase-by-phase tests and remaining content. This is the first substantial playable release, not every item in the full wishlist. Extra roster members, additional mini-bosses, feather/vacuum-specific recoveries, charged flaps, and a larger cosmetic/mission catalogue are deferred. Physical touch devices and subjective sound quality still need human testing; mobile-size browser rendering and pointer input have been checked.
+
+## Global leaderboard — v0.3.0
+
+Online deployments support Classic and UTC Daily top-20 boards with nickname entry after a flight. Follow `LEADERBOARD-SETUP.md` to connect Neon and initialize the database. Offline play still works. Lives pickups and deductions now consistently honor protection at both obstacles and world boundaries; the HUD shows remaining rescues out of two. Validation: 66 tests pass, including embedded PostgreSQL schema tests and leaderboard UI/API checks.
