@@ -1,5 +1,7 @@
 # CAT-ASTROPHE! development log
 
+> Historical record: this file preserves implementation-time observations and test counts. Statements below about dependency-free setup, local-only scores, offline network behavior, paths, or release completeness describe the build at that time and may no longer apply. Start with README.md and CONTRIBUTING.md for current instructions, docs/OPERATIONS.md for online infrastructure, and CHANGELOG.md for versioned changes. References to QA reports outside this repository are archival and are not required to build or test a clone.
+
 Fresh implementation. Old flappy-cat.html and obsolete notes were removed as requested. Source and generated standalone release live in this folder.
 
 ## Phase 1 — core

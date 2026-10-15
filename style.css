@@ -6,3 +6,6 @@
 
 
 .global-scores{margin-top:20px;border-top:1px solid #c9bda5;padding-top:16px}.global-scores label{display:block;text-align:left}.global-scores input{display:block;box-sizing:border-box;width:100%;font:inherit;padding:10px;margin:8px 0;border:1px solid #887b66;border-radius:8px}.scoreboard{width:100%;border-collapse:collapse;font-size:12px;margin:12px 0}.scoreboard th,.scoreboard td{padding:8px 4px;border-bottom:1px solid #d9cfb8;text-align:left;overflow-wrap:anywhere}.your-score{background:#e5d19a}
+
+/* Readable beginner instructions on desktop and small screens. */
+.lesson p{font-size:15px;line-height:1.55;color:#2e4641}.lesson>span{font-size:13px}.lesson-progress{font-size:12px}.lesson button{font-size:12px}.panel p{font-size:14px;line-height:1.6;color:#4e6358}@media(max-width:800px){.lesson p{font-size:14px}.lesson>span{font-size:12px}.panel p{font-size:13px}}

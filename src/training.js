@@ -3,10 +3,10 @@
 'use strict';
 const {C,clamp}=CatCore;
 const STEPS=[
- {title:'01 · Tiny paws, big confidence',text:'Tap the sky or press Space / ↑ three times. Let go to fall. There are no fatal crashes in practice.'},
- {title:'02 · Follow the fish',text:'Catch three fish. These practice fish float near your height. Small, spaced-out flaps keep you level. Fish charge your ability.'},
- {title:'03 · Your first terrible decision',text:'The practice pot follows your height and waits nearby. Press X or tap ZOOMIES when it arrives. In real flights, aim and time your pounce.'},
- {title:'04 · Get away with it',text:'The pot rang a bell! The dotted line warns where the pigeon will fly. Move above or below it, then let it pass.'}
+ {title:'1 of 4 · Let’s flap!',text:'Tap the sky or press Space / ↑ three times. Each tap lifts your cat. Stop tapping to float down. You are safe here!'},
+ {title:'2 of 4 · Catch some fish',text:'Fly into three fish to catch them. Tap a little at a time. Fish fill your Zoomies meter!'},
+ {title:'3 of 4 · Try Zoomies!',text:'Zoomies is a quick, safe dash. Wait for the pot to come close. Press X or tap ZOOMIES to dash into it!'},
+ {title:'4 of 4 · Dodge the pigeon',text:'Here comes a pigeon! It will fly along the dotted line. Fly above or below the line and let it pass.'}
 ];
 class Walkthrough{
  constructor(run){this.run=run;this.stage=0;this.complete=false;this.retry=0;run.tutorial=true;run.flaps=0;run.next=Infinity;run.gates=[];run.items=[];run.vy=0;run.charge=0;run.mischief.targets=[];run.mischief.reactions=[];run.emit('practice',{text:'SAFE PRACTICE · learn at your own pace'})}
@@ -22,9 +22,9 @@ class Walkthrough{
     if(!r.mischief.targets.some(t=>!t.hit))r.mischief.add('pot',300,clamp(r.y-20,130,600));
    }
   }
-  if(this.stage===3){if(r.mischief.counts.pigeons>0){this.complete=true;r.emit('graduated',{text:'A LICENSED LITTLE MENACE. You’re ready!'})}else if(!r.mischief.reactions.some(a=>a.kind==='chain'||(a.kind==='pigeon'&&!a.done))&&this.retry>2){r.mischief.queuePigeon(clamp(r.y,180,500));this.retry=0}}
+  if(this.stage===3){if(r.mischief.counts.pigeons>0){this.complete=true;r.emit('graduated',{text:'Great flying! You’re ready to play!'})}else if(!r.mischief.reactions.some(a=>a.kind==='chain'||(a.kind==='pigeon'&&!a.done))&&this.retry>2){r.mischief.queuePigeon(clamp(r.y,180,500));this.retry=0}}
  }
- get hint(){if(this.stage===2){if(this.run.cooldown>0&&this.run.mischief.counts.pots===0)return 'Recharging for another try… The practice pot will wait.';const target=this.run.mischief.targets.find(t=>!t.hit);if(target&&target.x>C.x-25&&target.x<C.x+115)return 'POT CLOSE! Press X or tap ZOOMIES now.'}return STEPS[this.stage]?.text||''}
+ get hint(){if(this.stage===2){if(this.run.cooldown>0&&this.run.mischief.counts.pots===0)return 'Recharging for another try… You’ve got this! The pot will wait.';const target=this.run.mischief.targets.find(t=>!t.hit);if(target&&target.x>C.x-25&&target.x<C.x+115)return 'Pot close! Press X or tap ZOOMIES now.'}return STEPS[this.stage]?.text||''}
 }
 root.CatTraining={Walkthrough,STEPS};if(typeof module!=='undefined')module.exports=root.CatTraining;
 })(globalThis);

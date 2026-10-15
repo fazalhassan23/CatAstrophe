@@ -2,10 +2,12 @@
 
 The game remains on Vercel. Neon hosts the PostgreSQL database; no server rental is needed.
 
+The existing production project is already configured. These steps are for a new deployment or environment; do not create a duplicate database for routine code updates. See [operations](docs/OPERATIONS.md) for the API contract, maintenance, troubleshooting, migrations and deployment checklist. Current boards retain/display 100 flights each.
+
 1. Sign in to Vercel and open the existing CatAstrophe project.
 2. Open Storage and create/connect a Neon PostgreSQL database through the Marketplace. Select the Free plan if offered; check its current limits before confirming. Choose a region near your Vercel functions.
 3. Connect the database to this project. Confirm the Production environment has `DATABASE_URL` (use the Neon connection string if the integration chose another variable name). Never put it in browser code or Git.
-4. Open the Neon SQL editor for the connected production database and run `database/schema.sql` from this project. It is safe to rerun.
+4. Open the Neon SQL editor for the connected database and run `database/schema.sql` from this project. It is safe to rerun for the existing schema. Vercel's embedded Query editor may require one statement at a time or the single-statement DO wrapper documented in the operations guide. Future column/constraint changes require explicit migrations.
 5. Generate a signing secret locally: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Add the value as the server-only Vercel environment variable `LEADERBOARD_SECRET`. Do not commit the value.
 6. Commit and push the changes, including `api/`, `server/`, `database/`, `package-lock.json`, and the rebuilt game. Redeploy after adding environment variables. Existing `vercel.json` leaves `/api/leaderboard` available to the Vercel function.
 7. On the deployed site, open Global top 100. It should show an empty board. Play a real flight, enter a nickname on the flight report, and submit. Check the result from a second browser.
@@ -16,7 +18,7 @@ Production and preview deployments should use separate Neon branches/databases. 
 
 - Separate Classic all-time and Daily boards. Daily dates and game seeds use UTC, resetting at midnight UTC.
 - Each board retains its top 100 flights; repeat nicknames are allowed, and names are not authenticated identities. Ties favor earlier submissions.
-- Daily history is retained for 30 days. Submission IDs are retained for 25 hours to prevent replay even after scores fall out of the top 100. Tickets expire after 24 hours.
+- Daily history is retained for 30 days. Submission IDs are retained for 25 hours to prevent replay even after scores fall out of the top 100. Cleanup occurs on requests, not on a schedule. Tickets expire after 24 hours; Daily tickets also expire at midnight UTC.
 - Nicknames are public, limited to 20 characters, and rendered as text. Do not enter personal information.
 - Requests to start/submit flights are limited to 20 per minute per hashed IP; raw IP addresses are not stored. SQL ranking/pruning is transactional and serialized.
 - Offline, unconfigured, or unavailable leaderboard service never blocks local play or progress. Practice and developer runs cannot submit through the game UI.
