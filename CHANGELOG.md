@@ -6,6 +6,8 @@ Notable product changes are recorded here. Dates use YYYY-MM-DD. Package version
 
 ### Changed
 
+- Added flapping wings for obstacle and chasing pigeons, respecting reduced motion. Restored the previous cat and fish artwork after visual feedback; their original movement and silhouettes are retained.
+
 - Simplified opening instructions and four practice lessons with shorter, literal language, numbered steps and encouraging retries/completion.
 - Adapted menu and lesson control prompts for coarse-pointer/touch versus keyboard devices.
 - Explained hearts as extra chances (maximum two), Zoomies as a quick dash, and protection/power messages in plain language.
