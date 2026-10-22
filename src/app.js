@@ -14,7 +14,7 @@ function applySettings(){
  $('#sound').textContent=save.settings.mute?'Sound off':'Sound on';
 }
 function button(text,action,cls='secondary'){const b=document.createElement('button');b.textContent=text;b.className=cls;b.onclick=()=>action();return b}
-function show(html){const s=$('#screen');s.className='screen';s.innerHTML='<div class="panel">'+html+'</div>';return s.firstElementChild}
+function show(html){const s=$('#screen');s.className='screen';s.innerHTML='<div class="panel panel-'+mode+'">'+html+'</div>';return s.firstElementChild}
 function flightHelp(){return matchMedia('(pointer: coarse)').matches?{flap:'Tap the sky',dash:'Tap ZOOMIES',pause:'Tap the pause button'}:{flap:'Press Space or ↑',dash:'Press X or click ZOOMIES',pause:'Press P to pause'}}
 function friendlyHint(text){const h=flightHelp();return text.replaceAll('Tap the sky or press Space / ↑',h.flap).replaceAll('Press X or tap ZOOMIES',h.dash)}
 function note(p,text){const n=document.createElement('p');n.textContent=text;p.append(n)}
@@ -24,13 +24,26 @@ function menu(){
  p.append(button(save.walkthroughComplete?'Let’s play  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
  if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
  const row=document.createElement('div');row.className='menu-row';
- row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));p.append(row);if(rootBoard())p.append(button('Global top 100',leaderboard));
- const h=flightHelp();note(p,h.flap+' to go up. Stop to float down.');note(p,h.dash+' when the meter is full. '+h.pause+'.');note(p,'Hearts give you another chance. Carry up to 2!');
+ row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));p.append(row);p.append(button('Our cats',ourCats));if(rootBoard())p.append(button('Global top 100',leaderboard));
+ const h=flightHelp();note(p,h.flap+' to go up. Stop to float down.');note(p,h.dash+' when the meter is full. '+h.pause+'.');note(p,'Hearts give you another chance. Carry up to 2!');note(p,'For Luna, Coco, and Pepe. Three cats, three stories, always close to our hearts.');
 }
 function rootBoard(){return globalThis.CatBoard}
 function leaderboard(){mode='leaderboard';const p=show('<span class="eyebrow">THE WORLD’S BIGGEST MENACES</span><h2>Global top 100.</h2>'),scores=document.createElement('div');p.append(button('Classic',()=>CatBoard.list(scores,'classic')),button('Daily',()=>CatBoard.list(scores,'daily')),scores,button('Back',menu));CatBoard.list(scores,'classic')}
+function ourCats(){
+ mode='stories';const p=show('<span class="eyebrow">THE CATS BEHIND THE ADVENTURE</span><h2>Our cats.</h2><p>For Luna, Coco, and Pepe. This little adventure is for them.</p>');
+ note(p,'These are real family stories. They include loss and a cat who went missing. Read them whenever you feel ready.');
+ for(const id of Object.keys(ROSTER))p.append(button('Meet '+ROSTER[id].name,()=>catStory(id,ourCats)));
+ p.append(button('Back to the game',menu));
+}
+function catStory(id,back=collection){
+ mode='story';const cat=ROSTER[id],story=globalThis.CatStories?.[id];if(!story)return back();
+ const p=show('<span class="eyebrow">'+cat.title+'</span><h2>'+cat.name+'</h2>');
+ const image=document.createElement('img');image.src=story.photo;image.alt=story.alt;image.className='story-photo';p.append(image);
+ const words=document.createElement('div');words.className='story-words';for(const text of story.paragraphs)note(words,text);p.append(words);
+ p.append(button('Back',back));
+}
 function collection(){
- mode='collection';const p=show('<span class="eyebrow">FISH BANK · '+save.balance+'</span><h2>A questionable<br>crew.</h2><canvas class="menu-cat" width="600" height="260"></canvas><div class="roster"></div>');
+ mode='collection';const p=show('<span class="eyebrow">FISH BANK · '+save.balance+'</span><h2>Choose your<br>flying friend.</h2><canvas class="menu-cat" width="600" height="260"></canvas><div class="roster"></div>');
  for(const [id,cat]of Object.entries(ROSTER)){
   const owned=save.unlocked.includes(id);
   const b=button(cat.name+(owned?selected===id?' · flying':' · select':' · unlock for '+cat.cost+' fish'),()=>{
@@ -38,8 +51,8 @@ function collection(){
    collection();
   },selected===id?'selected':'');
   b.disabled=!owned&&save.balance<cat.cost;
-  const preview=document.createElement('canvas');preview.className='cat-thumb';preview.dataset.cat=id;preview.width=180;preview.height=140;preview.setAttribute('aria-label',cat.name+' appearance');b.prepend(preview);
-  const small=document.createElement('small');small.textContent=cat.trait;b.append(small);p.querySelector('.roster').append(b);
+  const preview=document.createElement('canvas');preview.className='cat-thumb';preview.dataset.cat=id;preview.width=180;preview.height=140;preview.setAttribute('aria-label',cat.name+' appearance');const copy=document.createElement('span');copy.className='cat-card-copy';const name=document.createElement('span');name.className='cat-card-name';name.textContent=b.textContent;b.textContent='';copy.append(name);b.append(preview,copy);
+  const small=document.createElement('small');small.textContent=cat.trait;copy.append(small);const card=document.createElement('div');card.className='cat-card';const meet=button('Meet '+cat.name+' →',()=>catStory(id,collection));meet.className='cat-story-link';card.append(b,meet);p.querySelector('.roster').append(card);
  }
  p.append(button('Back to flight',menu));
 }
@@ -119,7 +132,8 @@ function resume(){if(!run)return;run.state='playing';$('#screen').className='scr
 function over(){
  mode='over';report=store.settle(run,daily);$('#live-controls').hidden=true;if(report?.newBest)audio.play('unlock');
  const names={ground:'A little tumble! Try a few small flaps.',ceiling:'A little too high! Let your cat float down.',laundry:'Watch out for the laundry next time!',pigeon:'Watch the dotted line to dodge pigeons.',vacuum:'Fly through the open gap to dodge the vacuum.',toast:'Watch out for the toast! Try again.',fan:'Give the fan a little more space.',yarn:'Caught in yarn! Tap three times to get free.'};
- const p=show('<span class="eyebrow">'+(run.lab?'LAB FLIGHT · NO REWARDS':daily?'DAILY FLIGHT · '+daily:'FLIGHT REPORT')+'</span><h2>'+(report?.newBest?'A new record!':'Nice try!')+'</h2><p>'+names[run.death]+'</p><div class="result-grid"><div><b>'+run.score+'</b>SCORE</div><div><b>'+save.best+'</b>BEST</div><div><b>'+run.fish+'</b>FISH '+(run.lab?'CAUGHT':'SAVED')+'</div><div><b>'+run.near+' / '+run.bestCombo+'×</b>NEAR MISSES / COMBO</div></div><p>'+run.passed+' obstacles passed. Keep practicing—you’ve got this!<br>Distance '+(run.stats.distance||0)+' · Passes '+run.stats.pass+' · Fish '+run.stats.fish+'<br>Dodges '+run.stats.near+' · Worlds '+run.stats.world+' · Events '+(run.stats.event||0)+' · Mischief '+(run.stats.mischief||0)+'<br>'+run.escapes+' tangles escaped · '+run.blocks+' boxes sacrificed.</p>');
+ const p=show('<span class="eyebrow">'+(run.lab?'LAB FLIGHT · NO REWARDS':daily?'DAILY FLIGHT · '+daily:'FLIGHT REPORT')+'</span><h2>'+(report?.newBest?'A new record!':'Nice try!')+'</h2><p>'+names[run.death]+'</p><div class="result-grid"><div><b>'+run.score+'</b>SCORE</div><div><b>'+save.best+'</b>BEST</div><div><b>'+run.fish+'</b>FISH '+(run.lab?'CAUGHT':'SAVED')+'</div><div><b>'+run.near+' / '+run.bestCombo+'×</b>NEAR MISSES / COMBO</div></div><details class="flight-details"><summary>Flight details &amp; cat adventure</summary><p>'+run.passed+' obstacles passed. Keep practicing—you’ve got this!<br>Distance '+(run.stats.distance||0)+' · Passes '+run.stats.pass+' · Fish '+run.stats.fish+'<br>Dodges '+run.stats.near+' · Worlds '+run.stats.world+' · Events '+(run.stats.event||0)+' · Mischief '+(run.stats.mischief||0)+'<br>'+run.escapes+' tangles escaped · '+run.blocks+' boxes sacrificed.</p></details>');
+ const details=p.querySelector('.flight-details');
  if(run.mischief){
   const m=run.mischief.counts,parts=[];
   if(m.pots)parts.push(m.pots+' flowerpot'+(m.pots===1?'':'s')+' smashed');
@@ -127,8 +141,8 @@ function over(){
   if(m.bells)parts.push(m.bells+' bell'+(m.bells===1?'':'s')+' rung');
   if(m.pigeons)parts.push(m.pigeons+' pigeon'+(m.pigeons===1?'':'s')+' outsmarted');
   const crime=document.createElement('div');crime.className='crime-report';
-  crime.innerHTML='<b>YOUR CAT ADVENTURE</b>';const text=document.createElement('p');text.textContent=parts.length?parts.join(' · '):'A peaceful flight. Try a Zoomies dash next time!';crime.append(text);p.append(crime);
-  note(p,'Mischief bonus: '+(run.stats.mischief||0)+' points');
+  crime.innerHTML='<b>YOUR CAT ADVENTURE</b>';const text=document.createElement('p');text.textContent=parts.length?parts.join(' · '):'A peaceful flight. Try a Zoomies dash next time!';crime.append(text);details.append(crime);
+  note(details,'Mischief bonus: '+(run.stats.mischief||0)+' points');
  }
  if(report?.completed.length)note(p,report.completed.map(m=>'Mission: '+m.title+' (+'+m.reward+' fish)').join(' · '));
  if(rootBoard()&&!run.lab&&!run.tutorial&&!params.has('dev'))CatBoard.mount(p,run,daily?'daily':'classic');

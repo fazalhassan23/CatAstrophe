@@ -12,9 +12,9 @@ The logical canvas is 450×720; floor is y=660, cat x=116, collision radius 15. 
 
 | Cat | Unlock | Physics relative to base | Ability |
 | --- | --- | --- | --- |
-| Biscuit | Free | Base | Zoomies: 100 charge, .42s dash |
-| Mochi | 20 fish | .82 gravity, .9 flap, .93 speed | Zoomies |
-| Sir Pounce | 45 fish | 1.08 gravity, 1.06 flap | Air Pounce: 65 charge, .28s dash |
+| Luna | Free | Base | Zoomies: 100 charge, .42s dash |
+| Coco | 20 fish | .82 gravity, .9 flap, .93 speed | Zoomies |
+| Pepe | 45 fish | 1.08 gravity, 1.06 flap | Air Pounce: 65 charge, .28s dash |
 
 Ability cooldown is 1.5s. Dash accelerates horizontal motion and protects briefly; tangle prevents activation. Fish adds 12 charge, successful near misses add 22, pigeon evasion adds 18; charge caps at 100. Catnip fills charge immediately.
 
@@ -49,4 +49,4 @@ Completed real flights bank fish/tokens and update local best, totals, missions,
 
 ## Global scores and Daily
 
-Classic retains the top 100 all-time flights, across all playable cats. Daily retains the top 100 for the current **UTC date**, forces Biscuit and uses a date-derived seed. Mystery reward collection does not advance course RNG. At midnight UTC the public Daily board changes; a previous day's ticket can no longer submit. Ties favor earlier submission, then run ID. One nickname can appear on multiple flights; names do not establish ownership or identity.
+Classic retains the top 100 all-time flights, across all playable cats. Daily retains the top 100 for the current **UTC date**, forces Luna and uses a date-derived seed. Mystery reward collection does not advance course RNG. At midnight UTC the public Daily board changes; a previous day's ticket can no longer submit. Ties favor earlier submission, then run ID. One nickname can appear on multiple flights; names do not establish ownership or identity.

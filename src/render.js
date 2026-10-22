@@ -12,24 +12,29 @@ function wing(c,x,y,t,color='#7995a1'){
  line(c,[[-8,-2],[-4,-4+lift],[2,-3+lift]],'#b7c8c8',1.5);c.restore();
 }
 function cat(c,x,y,t=0,id='biscuit',mood='curious',flap=0,rotation=0,outfit='none'){
- const ink='#493e3a',coat=id==='mochi'?'#fff4de':id==='pounce'?'#586371':'#eaa369',light=id==='pounce'?'#ece9dc':'#fff0cf';
- c.save();c.translate(x,y);c.rotate(rotation);const bounce=Math.max(0,1-flap*5);c.scale(1+bounce*.1,1-bounce*.07);
+ const ink='#493e3a',coco=id==='mochi',pepe=id==='pounce',luna=!coco&&!pepe,coat=coco?'#777982':pepe?'#b9a080':'#e7a45b',light='#fff9ef';
+ c.save();c.translate(x,y);c.rotate(rotation);if(luna)c.scale(.94,.94);const bounce=Math.max(0,1-flap*5);c.scale(1+bounce*.1,1-bounce*.07);
  // A separate articulated tail, four paws, ears, head, eyes and costume.
  c.save();c.rotate(Math.sin(t*5)*.15);line(c,[[-18,7],[-38,8],[-48,-1],[-45,-13]],ink,id==='mochi'?17:13);line(c,[[-18,7],[-38,8],[-48,-1],[-45,-13]],coat,id==='mochi'?12:8);c.restore();
+ if(pepe){line(c,[[-48,-1],[-45,-13]],ink,8)}
  const paw=Math.sin(t*10+flap*14)*9;
- ellipse(c,-14,23+paw,8,12,coat,ink);ellipse(c,14,23-paw,8,12,coat,ink);
- ellipse(c,-2,5,id==='mochi'?32:27,id==='mochi'?28:24,coat,ink);ellipse(c,4,10,15,15,light);
- if(id==='mochi'){for(let i=0;i<8;i++){const a=i*Math.PI/4;ellipse(c,Math.cos(a)*25,Math.sin(a)*21,9,9,coat)}}
- path(c,[[-21,-12],[-25,-40],[-5,-26]],coat,ink);path(c,[[8,-26],[28,-38],[26,-7]],coat,ink);
- path(c,[[-19,-22],[-21,-33],[-11,-26]],'#e69b94');path(c,[[15,-25],[24,-32],[23,-20]],'#e69b94');
- ellipse(c,4,-10,29,24,coat,ink);ellipse(c,7,1,18,11,light);
+ ellipse(c,-14,23+paw,8,12,light,ink);ellipse(c,14,23-paw,8,12,light,ink);
+ ellipse(c,-2,5,id==='mochi'?32:27,id==='mochi'?28:24,coat,ink);ellipse(c,4,12,coco?23:18,coco?22:17,light);
+ if(coco){for(let i=0;i<8;i++){const a=i*Math.PI/4;ellipse(c,Math.cos(a)*26,Math.sin(a)*22+4,8,8,a>0&&a<Math.PI?light:coat)}ellipse(c,4,14,22,18,light)}
+ const earTop=coco?-34:pepe?-48:-43;path(c,[[-21,-12],[-25,earTop],[-5,-26]],coat,ink);path(c,[[8,-26],[28,earTop+2],[26,-7]],coat,ink);
+ path(c,[[-19,-22],[-22,earTop+8],[-11,-26]],'#e4b1ae');path(c,[[15,-25],[24,earTop+9],[23,-20]],'#e4b1ae');
+ ellipse(c,4,-10,29,24,coat,ink);if(coco){ellipse(c,-20,-2,9,11,coat);ellipse(c,28,-2,9,11,coat)}
+ // White facial blaze, muzzle and chest follow the family photographs.
+ path(c,[[3,-33],[9,-33],[11,-20],[17,-5],[23,7],[8,13],[-9,7],[-6,-4],[1,-19]],light);ellipse(c,7,2,20,12,light);
  if(id==='biscuit'){line(c,[[-6,-32],[-3,-23]],'#b87549',3);line(c,[[4,-33],[6,-24]],'#b87549',3);line(c,[[15,-30],[14,-22]],'#b87549',3)}
+ if(pepe){line(c,[[-13,-24],[-6,-21]],'#78664e',2.5);line(c,[[17,-22],[23,-25]],'#78664e',2.5)}
  const sleepy=mood==='sleepy',happy=mood==='excited'||mood==='proud';
  if(sleepy||happy){line(c,[[-9,-9],[-4,happy?-13:-7],[1,-9]],ink,2.5);line(c,[[13,-9],[18,happy?-13:-7],[23,-9]],ink,2.5)}
- else{ellipse(c,-4,-10,mood==='spooked'?5:3.8,mood==='spooked'?7:5.5,ink);ellipse(c,18,-10,mood==='spooked'?5:3.8,mood==='spooked'?7:5.5,ink);ellipse(c,-3,-12,1.3,1.7,'#fff');ellipse(c,19,-12,1.3,1.7,'#fff')}
- path(c,[[4,-2],[11,-2],[7,2]],'#b76b6b');line(c,[[7,3],[7,5],[3,7]],ink,1.7);line(c,[[7,5],[11,7]],ink,1.7);
+ else{const iris=coco?'#d4aa4b':pepe?'#9baf70':'#9baf9b';ellipse(c,-4,-10,6,7,iris,ink);ellipse(c,18,-10,6,7,iris,ink);ellipse(c,-4,-10,mood==='spooked'?5:3.8,mood==='spooked'?7:5.5,ink);ellipse(c,18,-10,mood==='spooked'?5:3.8,mood==='spooked'?7:5.5,ink);ellipse(c,-3,-12,1.3,1.7,'#fff');ellipse(c,19,-12,1.3,1.7,'#fff')}
+ path(c,[[4,-2],[11,-2],[7,2]],coco?'#a6767e':'#de9b9d');line(c,[[7,3],[7,5],[3,7]],ink,1.7);line(c,[[7,5],[11,7]],ink,1.7);
  for(let s of [-1,1])for(let j=0;j<2;j++)line(c,[[7+s*16,1+j*4],[7+s*32,-1+j*8]],ink,1.5);
- if(id==='pounce'){path(c,[[-7,15],[3,20],[-7,26]],'#ed8574',ink);path(c,[[15,15],[5,20],[15,26]],'#ed8574',ink);ellipse(c,4,20,3,3,'#f9d482')}
+ // White forepaws remain visible at the sides without changing the flight hitbox.
+ ellipse(c,-20,17,6,8,light,ink);ellipse(c,25,17,6,8,light,ink);
  if(outfit==='goggles'){rr(c,-15,-20,17,15,5,'#adcfcc',ink);rr(c,11,-20,17,15,5,'#adcfcc',ink);line(c,[[2,-13],[11,-13]],ink,3)}
  if(outfit==='crown')path(c,[[-14,-31],[-18,-48],[-6,-41],[2,-53],[10,-41],[22,-49],[19,-30]],'#efc766',ink);
  c.restore();
