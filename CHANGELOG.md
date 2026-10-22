@@ -4,6 +4,24 @@ Notable product changes are recorded here. Dates use YYYY-MM-DD. Package version
 
 ## Unreleased
 
+### Layout
+
+- Compacted flight results into a four-column score strip, an inline nickname/submit form, and primary retry/menu actions. Detailed stats/adventure and the full leaderboard are expandable; leaderboard loading is deferred until opened and expands after submission.
+
+- Tidied panel spacing, heading sizes, menu navigation, story reading layout and leaderboard column widths. Character cards now group portraits/name/traits with compact, separate Meet links; removed oversized inherited roster-button styling from story links. Kept the approved character artwork unchanged. Full suite: 68 passing tests; collection and story navigation checked in the demo.
+
+### Character artwork
+
+- Matched playable designs to family references: Luna's smaller orange-and-white kitten silhouette, Coco's grey coat, white facial blaze/chest fluff and golden eyes, and Pepe's sandy coat, large ears, white markings, green-gold eyes and dark tail tip. Removed Pepe's inherited bow tie. Shared renderer updates menu portraits, roster and flights; physics and saved IDs are unchanged.
+
+### Added
+
+- An optional Our cats page and free Meet links for Luna, Coco, and Pepe, with family photos, individual stories, a gentle introduction to loss/missing-pet themes, and a dedication. Photos are included in the standalone offline build.
+
+### Character names
+
+- Renamed Biscuit to Luna (The Little Spark), Mochi to Coco (The Gentle Soul), and Sir Pounce to Pepe (The Little Lion). Updated descriptions and current contributor/gameplay references. Internal IDs, flight traits, unlock costs, saves and database values stay compatible. Pepe's story says he went missing; it does not presume he died.
+
 ### Changed
 
 - Added flapping wings for obstacle and chasing pigeons, respecting reduced motion. Restored the previous cat and fish artwork after visual feedback; their original movement and silhouettes are retained.
@@ -14,6 +32,8 @@ Notable product changes are recorded here. Dates use YYYY-MM-DD. Package version
 - Replaced discouraging result copy with helpful retry tips and a friendly cat-adventure report; clarified sidebar controls and beginner goals.
 
 ### Documentation
+
+- Added GIT-HANDOFF.md describing the current batch, rationale, compatibility, required assets, validation and safe Git/deployment steps for the next maintainer or AI.
 
 - Reorganized README and added contributor, architecture, gameplay and production operations references.
 - Documented actual dependency requirements, full-stack versus static development, API contract, retention, security limitations and release/migration procedures.

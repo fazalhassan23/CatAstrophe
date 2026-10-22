@@ -1,3 +1,4 @@
+require('../src/stories.js');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const {Run,C}=require('../src/core.js');require('../src/mischief.js');const {Walkthrough}=require('../src/training.js');require('../src/render.js');const save=require('../src/save.js');
 function enterPounce(){const r=new Run(17),w=new Walkthrough(r);r.flap();r.flap();r.flap();w.step(0);for(let i=0;i<1800&&w.stage<2;i++){if(r.y>360&&r.vy>0)r.flap();r.step(1/120);w.step(1/120)}assert.equal(w.stage,2);assert.equal(r.charge,100);return{r,w}}
@@ -21,7 +22,7 @@ function appHarness(){
  class Element{constructor(tag='div'){this.tag=tag;this.children=[];this.style={};this.textContent='';this.classList={toggle(){}}}append(...nodes){this.children.push(...nodes)}prepend(...nodes){this.children.unshift(...nodes)}get firstChild(){return this.textNode??={textContent:''}}get firstElementChild(){return this.first??=new Element()}querySelector(){return new Element()}setAttribute(){}addEventListener(){}focus(){}closest(){return null}getContext(){return new Proxy({},{get(){return()=>{}}})}}
  const nodes=new Map(),handlers={};const document={querySelector(s){if(!nodes.has(s))nodes.set(s,new Element());return nodes.get(s)},querySelectorAll(){return[]},createElement(tag){return new Element(tag)},addEventListener(k,f){handlers[k]=f}};
  let nextFrame,lastRun,ms=0;const storage={value:null,getItem(){return this.value},setItem(k,v){this.value=v}};
- const context={document,window:{addEventListener(){}},CatCore,CatMischief,CatTraining,CatSave:save,CatArt:{cat(){},Renderer:class{constructor(){this.c={scale(){}}}burst(){}draw(r){lastRun=r}}},CatAudio:class{init(){}play(){}},localStorage:storage,matchMedia(){return{matches:false}},URLSearchParams,location:{search:''},requestAnimationFrame(f){nextFrame=f},console};
+ const context={document,window:{addEventListener(){}},CatCore,CatMischief,CatTraining,CatStories,CatSave:save,CatArt:{cat(){},Renderer:class{constructor(){this.c={scale(){}}}burst(){}draw(r){lastRun=r}}},CatAudio:class{init(){}play(){}},localStorage:storage,matchMedia(){return{matches:false}},URLSearchParams,location:{search:''},requestAnimationFrame(f){nextFrame=f},console};
  vm.runInNewContext(fs.readFileSync(require.resolve('../src/app.js'),'utf8'),context);
  function click(text){const visit=n=>{if(n.textContent===text&&n.onclick){n.onclick();return true}return(n.children||[]).some(visit)};assert.ok(visit(nodes.get('#screen').firstElementChild),'button missing: '+text)}
  function key(code,target={closest(){return null}},repeat=false){let prevented=false;handlers.keydown({code,target,repeat,preventDefault(){prevented=true}});return prevented}
@@ -39,3 +40,6 @@ test('QA-01: application walkthrough recovers an early pounce, shows graduation 
  }
  assert.equal(attemptedEarly,true);assert.equal(retried,true);assert.equal(r.state,'complete');assert.match(app.nodes.get('#screen').innerHTML,/WALKTHROUGH COMPLETE/);assert.equal(app.nodes.get('#lesson').hidden,true);assert.equal(app.progress().walkthroughComplete,true);assert.equal(app.progress().balance,0);app.click('My first real flight  →');r=app.step();assert.equal(r.state,'playing');assert.ok(!r.tutorial);assert.equal(r.charge,0);
 });
+
+test('family stories open for every cat without spending currency',()=>{const app=appHarness();app.click('Our cats');for(const name of ['Luna','Coco','Pepe']){app.click('Meet '+name);assert.match(app.nodes.get('#screen').innerHTML,new RegExp(name));app.click('Back')}app.click('Back to the game');assert.match(app.nodes.get('#screen').innerHTML,/cat-astrophe/)});
+test('memorial names preserve stable save and leaderboard IDs',()=>{assert.deepEqual(Object.keys(CatCore.ROSTER),['biscuit','mochi','pounce']);assert.deepEqual(Object.values(CatCore.ROSTER).map(c=>c.name),['Luna','Coco','Pepe']);assert.match(CatStories.pounce.paragraphs.join(' '),/do not know what happened/);assert.ok(CatStories.mochi.photo.endsWith('coco.png'))});

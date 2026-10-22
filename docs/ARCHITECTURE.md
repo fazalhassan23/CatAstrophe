@@ -47,7 +47,7 @@ Settlement requires over, ignores tutorial/lab, and uses a WeakSet to credit eac
 
 ### New cat
 
-Add a `ROSTER` entry with name, copy, cost and gravity/flap/speed multipliers, plus a distinct renderer appearance. Menus reuse that renderer. Test unlocks, normalization and route safety. Update server cat validation and migrate the database CHECK constraint before the cat submits scores. Daily deliberately forces Biscuit.
+Add a `ROSTER` entry with name, copy, cost and gravity/flap/speed multipliers, plus a distinct renderer appearance. Menus reuse that renderer. Test unlocks, normalization and route safety. Update server cat validation and migrate the database CHECK constraint before the cat submits scores. Daily deliberately forces Luna.
 
 ### New hazard/world
 

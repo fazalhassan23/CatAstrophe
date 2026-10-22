@@ -22,10 +22,10 @@ function mount(panel,run,board){
  const area=element('section');area.className='global-scores';area.append(element('h3','GLOBAL TOP 100'));
  const form=element('form'),label=element('label','Your nickname'),input=element('input');input.maxLength=20;input.required=true;input.autocomplete='nickname';label.append(input);
  try{input.value=localStorage.getItem('catastrophe-nickname')||''}catch{}
- const submit=element('button','Submit score');submit.type='submit';const status=element('p');status.setAttribute('aria-live','polite');
- form.append(label,submit);area.append(form,status);const scores=element('div');area.append(scores);panel.append(area);list(scores,board);
+ const submit=element('button','Submit score');submit.type='submit';submit.className='submit-score';const status=element('p');status.setAttribute('aria-live','polite');
+ form.append(label,submit);area.append(form,status);const scores=element('div'),boardDetails=element('details'),summary=element('summary','View global top 100');boardDetails.className='board-details';boardDetails.append(summary,scores);area.append(boardDetails);panel.append(area);let loaded=false;boardDetails.ontoggle=()=>{if(boardDetails.open&&!loaded){loaded=true;list(scores,board)}};
  form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;status.textContent='Submitting…';
- try{const t=await run.onlineTicket;if(!t?.token)throw Error(t?.error||'This flight has no online ticket. Start a new flight to submit.');const name=input.value.trim();const data=await request({token:t.token,name,score:run.score,seconds:run.time,cat:run.cat});try{localStorage.setItem('catastrophe-nickname',name)}catch{}status.textContent=data.accepted?'Score submitted!':'This flight was already submitted.';input.disabled=true;submit.textContent='Submitted';await list(scores,board,data.id)}
+ try{const t=await run.onlineTicket;if(!t?.token)throw Error(t?.error||'This flight has no online ticket. Start a new flight to submit.');const name=input.value.trim();const data=await request({token:t.token,name,score:run.score,seconds:run.time,cat:run.cat});try{localStorage.setItem('catastrophe-nickname',name)}catch{}status.textContent=data.accepted?'Score submitted!':'This flight was already submitted.';input.disabled=true;submit.textContent='Submitted';loaded=true;boardDetails.open=true;await list(scores,board,data.id)}
  catch(err){status.textContent=err.message;submit.disabled=false}
  };
 }

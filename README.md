@@ -16,6 +16,7 @@ Browser gameplay is plain JavaScript. Online scores use a Vercel Function and Ne
 | [Operations](docs/OPERATIONS.md) | API contract, database maintenance, deployment, troubleshooting |
 | [Leaderboard setup](LEADERBOARD-SETUP.md) | First-time Vercel/Neon configuration |
 | [Changelog](CHANGELOG.md) | Versioned changes and unreleased work |
+| [Git handoff](GIT-HANDOFF.md) | What changed, why, affected files, validation and commit/deployment checklist |
 | [Development history](DEVELOPMENT.md) | Historical implementation/QA notes; not current setup instructions |
 
 ## Quick start
@@ -77,3 +78,7 @@ Open `http://127.0.0.1:4173/?dev=1`, then Settings → Flight lab. Scenarios rep
 Package version: **0.3.0**. The top-100 expansion landed after the initial top-20 release without a version bump; the changelog records this explicitly. The last full suite passed **66 tests**, including PostgreSQL retention/replay checks and lives accounting. Run the current suite rather than relying on this recorded count.
 
 The leaderboard rejects basic malformed/implausible submissions but does not replay gameplay server-side. Physical touch hardware, broad browser coverage, subjective difficulty and audio quality still need human testing. LocalStorage reconciliation reduces stale-tab overwrites but is not an atomic database transaction. See operations before changing production data.
+
+## Our cats
+
+The characters honor Luna, Coco, and Pepe. Open **Our cats** from the menu, or **Meet [name]** in the cat collection, to see their family photos and stories. Stories are optional and gently introduce loss/missing-pet themes. Photos are in `assets/cats/`, story text in `src/stories.js`, and the build embeds them for offline reading. The gameplay artwork remains the established cartoon style. Internal IDs `biscuit`, `mochi`, and `pounce` remain stable for existing saves and score rows; only display names changed. Do not rename those IDs as a cosmetic edit. Family photos and stories should not be repurposed without the owner’s permission.
