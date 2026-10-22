@@ -7,6 +7,7 @@ let storage;try{storage=localStorage}catch{}
 const store=new CatSave.Store(storage),save=store.data,params=new URLSearchParams(location.search);
 renderer.c.scale(2,2);
 let run=null,mode='menu',acc=0,last=0,toastTime=0,selected=save.selected,daily='',report=null,trainer=null;
+let photoDialog=null;
 function applySettings(){
  audio.volume=save.settings.mute?0:save.settings.fx;
  audio.music=save.settings.mute?0:save.settings.music;
@@ -24,8 +25,8 @@ function menu(){
  p.append(button(save.walkthroughComplete?'Let’s play  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
  if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
  const row=document.createElement('div');row.className='menu-row';
- row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));p.append(row);p.append(button('Our cats',ourCats));if(rootBoard())p.append(button('Global top 100',leaderboard));
- const h=flightHelp();note(p,h.flap+' to go up. Stop to float down.');note(p,h.dash+' when the meter is full. '+h.pause+'.');note(p,'Hearts give you another chance. Carry up to 2!');note(p,'For Luna, Coco, and Pepe. Three cats, three stories, always close to our hearts.');
+ row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));row.append(button('Our cats',ourCats));if(rootBoard())row.append(button('Global top 100',leaderboard));p.append(row);
+ const h=flightHelp();const help=document.createElement('div');help.className='menu-help';note(help,h.flap+' to go up. Stop to float down.');note(help,h.dash+' when full. '+h.pause+'.');note(help,'Hearts give another chance · carry up to 2');p.append(help);const dedication=document.createElement('p');dedication.className='menu-dedication';dedication.textContent='For Luna, Coco, and Pepe. Always close to our hearts.';p.append(dedication);
 }
 function rootBoard(){return globalThis.CatBoard}
 function leaderboard(){mode='leaderboard';const p=show('<span class="eyebrow">THE WORLD’S BIGGEST MENACES</span><h2>Global top 100.</h2>'),scores=document.createElement('div');p.append(button('Classic',()=>CatBoard.list(scores,'classic')),button('Daily',()=>CatBoard.list(scores,'daily')),scores,button('Back',menu));CatBoard.list(scores,'classic')}
@@ -38,9 +39,19 @@ function ourCats(){
 function catStory(id,back=collection){
  mode='story';const cat=ROSTER[id],story=globalThis.CatStories?.[id];if(!story)return back();
  const p=show('<span class="eyebrow">'+cat.title+'</span><h2>'+cat.name+'</h2>');
- const image=document.createElement('img');image.src=story.photo;image.alt=story.alt;image.className='story-photo';p.append(image);
+ const image=document.createElement('img');image.src=story.photo;image.alt=story.alt;image.className='story-photo';const photoButton=button('',()=>openPhoto(image,photoButton));photoButton.className='story-photo-button';photoButton.setAttribute('aria-label','View full-size photo of '+cat.name);photoButton.append(image);p.append(photoButton);note(p,'Tap the photo to see it full screen.');
  const words=document.createElement('div');words.className='story-words';for(const text of story.paragraphs)note(words,text);p.append(words);
  p.append(button('Back',back));
+}
+function openPhoto(image,trigger){
+ if(photoDialog)return;
+ const dialog=document.createElement('dialog');dialog.className='photo-viewer';dialog.setAttribute('aria-label','Full-size cat photo');photoDialog=dialog;
+ const close=button('← Back to story · Close',()=>dialog.close());close.className='photo-close';
+ const full=document.createElement('img');full.src=image.src;full.alt=image.alt;dialog.append(close,full);
+ const previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
+ dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+ dialog.addEventListener('close',()=>{photoDialog=null;document.body.style.overflow=previousOverflow;dialog.remove();trigger.focus()},{once:true});
+ document.body.append(dialog);dialog.showModal();close.focus();
 }
 function collection(){
  mode='collection';const p=show('<span class="eyebrow">FISH BANK · '+save.balance+'</span><h2>Choose your<br>flying friend.</h2><canvas class="menu-cat" width="600" height="260"></canvas><div class="roster"></div>');
@@ -169,6 +180,8 @@ function lab(){
 function flap(){if(mode==='playing')run.flap()}
 canvas.addEventListener('pointerdown',e=>{e.preventDefault();flap()});
 document.addEventListener('keydown',e=>{
+ if(photoDialog){if(e.code==='Escape'){e.preventDefault();photoDialog.close()}return}
+
  // Native form controls own their keys, including sliders and editable descendants.
  if(e.target.closest('input,select,textarea,[contenteditable]:not([contenteditable="false"]),[role="slider"]'))return;
  if(e.target.closest('button,a')&&['Space','ArrowUp'].includes(e.code))return;
