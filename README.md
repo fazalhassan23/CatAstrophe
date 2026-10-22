@@ -17,6 +17,7 @@ Browser gameplay is plain JavaScript. Online scores use a Vercel Function and Ne
 | [Leaderboard setup](LEADERBOARD-SETUP.md) | First-time Vercel/Neon configuration |
 | [Changelog](CHANGELOG.md) | Versioned changes and unreleased work |
 | [Git handoff](GIT-HANDOFF.md) | What changed, why, affected files, validation and commit/deployment checklist |
+| [Responsive QA](docs/RESPONSIVE-QA.md) | Phone/tablet viewport results and real-device testing limits |
 | [Development history](DEVELOPMENT.md) | Historical implementation/QA notes; not current setup instructions |
 
 ## Quick start

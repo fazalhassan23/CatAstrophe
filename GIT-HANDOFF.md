@@ -60,6 +60,12 @@ User feedback said instructions were difficult to read, especially for children.
 
 ### F. Layout cleanup
 
+Photo-viewer follow-up: removed the colored side backgrounds around story photos and wrapped photos in accessible named buttons. Opening creates a native modal dialog outside the game frame; full image scales to the viewport, with Close/Back to story and Escape support. Closing restores body scrolling, keyboard focus and the existing story view. Files: `src/app.js`, `style.css`, rebuilt dist. Browser opening/Close/Escape verified; 68 existing tests pass. No new assets or database changes.
+
+Responsive follow-up: `style.css` now adapts through a 1050px single-column breakpoint, short phones and landscape phones, keeps active gameplay proportions, uses mobile-friendly input/touch sizing, and allows long reading panels to scroll vertically. `docs/RESPONSIVE-QA.md` records eight-size browser measurements and limits. All 68 automated tests pass; dist rebuilt. Include this new QA document in Git. Real-device and every-size interactive flight/report validation remain outstanding.
+
+Home-screen follow-up: grouped all eight secondary destinations into a three-column grid, widened the panel, reduced decorative gaps, grouped short control hints and shortened the dedication. Home-only frame height now uses available viewport height; flight layout remains unchanged. Browser measurements confirmed the menu's content height equals its visible height in the narrow preview. Source: `src/app.js` and `style.css`; dist rebuilt. Very small/zoomed viewports retain scrolling as an accessibility fallback rather than clipping text.
+
 Follow-up: the flight report now keeps key scores and the nickname/submit row compact. Detailed stats/adventure and the full leaderboard use expandable sections, so retry and menu actions are reachable without scrolling in the inspected default report. Leaderboard requests are deferred until expanded; submission still fetches and opens the resulting ranking. Changed `src/app.js`, `src/leaderboard.js`, `style.css` and rebuilt dist. Full suite remains 68 passing tests. Expanded sections and very short viewports may still scroll.
 
 The cat collection had oversized Meet buttons caused by broad roster-button CSS. It also had awkward gaps and unnecessary crowding.

@@ -6,6 +6,12 @@ Notable product changes are recorded here. Dates use YYYY-MM-DD. Package version
 
 ### Layout
 
+- Removed story-photo letterbox backgrounds. Photos now open a viewport-filling modal with an uncropped image, Back to story/Close button, Escape/backdrop dismissal, scroll locking and focus restoration. Browser-verified opening, closing and Escape; existing 68 tests pass.
+
+- Added phone/tablet/landscape layouts, short-height menu treatment, mobile input sizing, touch panning and safe-area-aware header padding. Measured home, collection and story layouts at eight viewport sizes; see docs/RESPONSIVE-QA.md for results and limitations.
+
+- Compacted the home screen with wider panel spacing, a three-column navigation grid, grouped control hints and a shorter dedication. The home frame uses available viewport height; gameplay retains its existing proportions. Verified no internal menu overflow in the narrow demo.
+
 - Compacted flight results into a four-column score strip, an inline nickname/submit form, and primary retry/menu actions. Detailed stats/adventure and the full leaderboard are expandable; leaderboard loading is deferred until opened and expands after submission.
 
 - Tidied panel spacing, heading sizes, menu navigation, story reading layout and leaderboard column widths. Character cards now group portraits/name/traits with compact, separate Meet links; removed oversized inherited roster-button styling from story links. Kept the approved character artwork unchanged. Full suite: 68 passing tests; collection and story navigation checked in the demo.
