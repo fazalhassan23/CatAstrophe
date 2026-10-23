@@ -154,3 +154,21 @@ Validation: 97 tests pass; npm run build succeeds. New regressions cover unchang
 Code review found the combined eight-badge/three-keepsake list unnecessarily long on phones. Split Milestones into Badges and Keepsakes selectors with aria-pressed state; show three badges per page with disabled endpoint controls, a labeled page count, and a sticky Back action. Preserve 44px button targets, shared colors and typography, and scrolling as a fallback for small viewports or larger text. No gameplay/save format changes.
 
 Changed src/app.js, style.css, tests/qa-regressions.cjs and rebuilt dist/cat-astrophe.html. The application-flow test now loads discoveries and the minimal DOM correctly replaces children when innerHTML changes; pagination, switching collections and returning without spending currency are covered. Full suite: 98 pass. Build succeeds. Browser startup was retried and still fails on the unrelated BitLocker-locked D: drive; visual/device checks remain pending. Do not describe static review as responsive browser sign-off. No commit, push or deployment performed.
+
+
+## Live responsive review resumed — 2026-10-23
+Unlocking D: allowed browser kernel startup. In-app preview loaded from http://127.0.0.1:4180/ (host preview server; isolated port 4177 was unreachable). Observed phone home and milestone screenshots at 390x844; milestone first page fit with zero internal overflow, and Next displayed badge page 2 correctly.
+
+Measured home panel overflow before repair: 320x568:243px; 390x844:61px; 412x915:0px; 844x390:115px; 768x1024:0px; 1440x900:113px. No horizontal document overflow was measured. Desktop document had 67px vertical overflow; tall-phone/tablet document had 2px. Measurements were from actual rendered DOM, not estimates.
+
+Applied style.css fixes: smaller decorative room/header rhythm for medium-height displays, two-column compact short-phone controls, simplified landscape grid, desktop panel height and page margins adjusted to viewport. Controls retain 44px minimum button targets (How to play summary retains existing 36px compact treatment). On short displays decorative intro/artwork/dedication are hidden; cat and difficulty buttons remain. Long story/collection content and expanded help retain scroll fallback for accessibility.
+
+Validation: 98 tests pass; standalone build succeeds. Browser transport closed after CSS edit; reload/reset retries also report Transport closed. Therefore post-fix viewport measurements, keepsake/story/results screens, live gameplay feel and physical-device performance still need review. Do not mark full visual/mobile QA complete. No push/deploy. Source changes: style.css; rebuilt dist/cat-astrophe.html. This supersedes the earlier statement that browser could not start at all.
+
+
+## Desktop animation preference fix — 2026-10-23
+Reported: exhaust fans and other animations appear static on desktop. Source diagnosis: renderer.motion combined saved motion=true with OS prefers-reduced-motion, but Settings showed only the saved boolean; users could see a checked control while all decorative clocks were forced to zero. Desktop user's actual device preference could not be inspected because browser transport is disconnected, so this is a confirmed code defect and likely cause, not a verified device diagnosis.
+
+Settings now reflect effective animation state. Explicitly changing Animations (fans, wings and cat movement) saves motionOverride=true, allowing user choice to take precedence over OS reduced motion. New/old saves still follow OS preference by default; false remains off. Use device motion preference clears the override and restores automatic handling. Fan rendering now independently honors static mode even if obstacle() receives a nonzero clock. No physics or scoring changes.
+
+Files: src/app.js, src/save.js, src/render.js, tests/fan-animation.cjs, tests/qa-regressions.cjs, rebuilt dist/cat-astrophe.html. Validation: 102 tests pass; build succeeds. Tests cover advancing fan blade rotations, static reduced-motion blades, old/malformed preference defaults, explicit setting persistence and restoring device preference through actual application handlers. Visual confirmation on desktop remains pending due browser transport failure. Reload latest build and enable Settings → Animations to opt in when the device prefers reduced motion.

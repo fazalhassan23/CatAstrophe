@@ -68,3 +68,7 @@ Badges grant no extra currency. Results show a brief static message for newly ea
 
 ### Relaxed discoveries
 Optional three-star trails offer one saved keepsake for Luna, Coco and Pepe. Catch every star in a trail, then finish the flight to save it. Check Milestones → Relaxed discoveries. Skipping trails has no penalty; they award no points or currency. Classic/Daily have no trails. Gentle background weather and cat-themed scenery respect reduced motion.
+
+
+### Animation preferences
+Settings → Animations controls fan blades, pigeon wings and cat movement. By default the game follows your device’s reduced-motion preference. An explicit checkbox choice takes precedence and is saved locally. Use device motion preference restores automatic handling.

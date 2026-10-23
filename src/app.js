@@ -11,7 +11,7 @@ let photoDialog=null,flightStyle='classic';
 function applySettings(){
  audio.volume=save.settings.mute?0:save.settings.fx;
  audio.music=save.settings.mute?0:save.settings.music;
- renderer.motion=save.settings.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
+ renderer.motion=save.settings.motion&&(save.settings.motionOverride||!matchMedia('(prefers-reduced-motion: reduce)').matches);
  $('#sound').textContent=save.settings.mute?'Sound off':'Sound on';
 }
 function button(text,action,cls='secondary'){const b=document.createElement('button');b.textContent=text;b.className=cls;b.onclick=()=>action();return b}
@@ -128,10 +128,12 @@ function settings(back){
   const input=document.createElement('input');input.type='range';input.min=0;input.max=1;input.step=.05;input.value=save.settings[key];
   input.oninput=()=>{save.settings[key]=+input.value;applySettings();store.write()};l.append(input);p.append(l);
  }
- for(const [key,label]of [['mute','Mute all audio'],['motion','Particles and motion effects']]){
-  const l=document.createElement('label');l.className='setting';const input=document.createElement('input');input.type='checkbox';input.checked=save.settings[key];
-  input.onchange=()=>{save.settings[key]=input.checked;applySettings();store.write()};l.append(input,' '+label);p.append(l);
+ for(const [key,label]of [['mute','Mute all audio'],['motion','Animations (fans, wings and cat movement)']]){
+  const l=document.createElement('label');l.className='setting';const input=document.createElement('input');input.type='checkbox';input.checked=key==='motion'?renderer.motion:save.settings[key];
+  input.onchange=()=>{save.settings[key]=input.checked;if(key==='motion')save.settings.motionOverride=true;applySettings();store.write()};l.append(input,' '+label);p.append(l);
  }
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)note(p,'Your device prefers less motion. Turn Animations on above if you would like fans, wings and cats to move.');
+ p.append(button('Use device motion preference',()=>{save.settings.motion=true;save.settings.motionOverride=false;applySettings();store.write();settings(back)}));
  if(!store.available)note(p,'Browser storage is unavailable. Progress lasts for this session.');
  p.append(button('Back',back));if(params.has('dev'))p.append(button('Flight lab',lab));
 }
