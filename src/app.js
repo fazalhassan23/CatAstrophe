@@ -38,7 +38,7 @@ function menu(){
  p.append(button(save.walkthroughComplete?'Let’s play  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
  if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
  const row=document.createElement('div');row.className='menu-row';
- row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));row.append(button('Our cats',ourCats));if(rootBoard())row.append(button('Global top 100',leaderboard));p.append(row);
+ row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Milestones',milestones),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));row.append(button('Our cats',ourCats));if(rootBoard())row.append(button('Global top 100',leaderboard));p.append(row);
  const h=flightHelp();const help=document.createElement('details');help.className='menu-help';const helpTitle=document.createElement('summary');helpTitle.textContent='How to play';help.append(helpTitle);note(help,h.flap+' to go up. Stop to float down.');note(help,h.dash+' when full. '+h.pause+'.');note(help,'Hearts give another chance · carry up to 2');p.append(help);const dedication=document.createElement('p');dedication.className='menu-dedication';dedication.textContent='For Luna, Coco, and Pepe. Always close to our hearts.';p.append(dedication);
 }
 function rootBoard(){return globalThis.CatBoard}
@@ -100,8 +100,18 @@ function missions(){
  }
  if(save.missions.length===CatSave.MISSIONS.length)note(p,'All missions complete. An accomplished menace.');
  note(p,save.missions.length+' missions complete · '+save.achievements.length+' achievements');
- if(save.achievements.length)note(p,save.achievements.map(a=>a.replaceAll('-',' ')).join(' · '));
+ if(save.achievements.length)note(p,save.achievements.map(a=>CatSave.MILESTONES.find(m=>m.id===a)?.title||a.replaceAll('-',' ')).join(' · '));
  note(p,'Daily best: '+(save.daily[CatSave.dailyKey()]||0));p.append(button('Back',menu));
+}
+function milestones(){
+ mode='milestones';const p=show('<span class="eyebrow">YOUR LITTLE VICTORIES</span><h2>Look how far<br>you’ve flown.</h2>');
+ note(p,'Classic and Daily flights count. Badges celebrate your progress; no extra fish are awarded.');
+ for(const m of CatSave.MILESTONES){const earned=save.achievements.includes(m.id),value=CatSave.milestoneProgress(save,m),card=document.createElement('div');card.className='milestone-card'+(earned?' earned':'');
+ const title=document.createElement('b');title.textContent=(earned?'✓ ':'')+m.title;card.append(title);note(card,m.text);
+ const status=document.createElement('span');status.textContent=earned?'Badge earned':value+' / '+m.goal;card.append(status);
+ const progress=document.createElement('progress');progress.max=m.goal;progress.value=value;progress.setAttribute('aria-label',m.title+' progress');card.append(progress);p.append(card)}
+ if(globalThis.CatDiscovery){const title=document.createElement('h3');title.textContent='Relaxed discoveries';p.append(title);note(p,'Optional star trails save keepsakes, not points. Fly with each cat to find theirs.');for(const memory of Object.values(CatDiscovery.MEMORIES)){const card=document.createElement('div');card.className='milestone-card';note(card,(save.discoveries.includes(memory.id)?'✓ Found: ':'Not found yet: ')+memory.title);p.append(card)}}
+ p.append(button('Back',menu));
 }
 function settings(back){
  mode='settings';const p=show('<span class="eyebrow">ADJUST THE CHAOS</span><h2>Creature comforts.</h2>');
@@ -154,10 +164,12 @@ function pause(){
 }
 function resume(){if(!run)return;run.state='playing';$('#screen').className='screen empty';mode='playing';acc=0;last=0;canvas.focus()}
 function over(){
- mode='over';report=store.settle(run,daily);$('#live-controls').hidden=true;if(report?.newBest)audio.play('unlock');
+ mode='over';report=store.settle(run,daily);$('#live-controls').hidden=true;if(report?.newBest||report?.milestones?.length)audio.play('unlock');
  const names={ground:'A little tumble! Try a few small flaps.',ceiling:'A little too high! Let your cat float down.',laundry:'Watch out for the laundry next time!',pigeon:'Watch the dotted line to dodge pigeons.',vacuum:'Fly through the open gap to dodge the vacuum.',toast:'Watch out for the toast! Try again.',fan:'Give the fan a little more space.',yarn:'Caught in yarn! Tap three times to get free.'};
  const p=show('<span class="eyebrow">'+(run.lab?'LAB FLIGHT · NO REWARDS':run.mode==='relaxed'?'RELAXED FLIGHT · LOCAL BEST ONLY':daily?'DAILY FLIGHT · '+daily:'FLIGHT REPORT')+'</span><h2>'+(report?.newBest?'A new record!':'Nice try!')+'</h2><p>'+names[run.death]+'</p><div class="result-grid"><div><b>'+run.score+'</b>SCORE</div><div><b>'+(run.mode==='relaxed'?save.relaxedBest:save.best)+'</b>BEST</div><div><b>'+run.fish+'</b>FISH '+(run.lab||run.mode==='relaxed'?'CAUGHT':'SAVED')+'</div><div><b>'+run.near+' / '+run.bestCombo+'×</b>NEAR MISSES / COMBO</div></div><details class="flight-details"><summary>Flight details &amp; cat adventure</summary><p>'+run.passed+' obstacles passed. Keep practicing—you’ve got this!<br>Distance '+(run.stats.distance||0)+' · Passes '+run.stats.pass+' · Fish '+run.stats.fish+'<br>Dodges '+run.stats.near+' · Worlds '+run.stats.world+' · Events '+(run.stats.event||0)+' · Mischief '+(run.stats.mischief||0)+'<br>'+run.escapes+' tangles escaped · '+run.blocks+' boxes sacrificed.</p></details>');
  const details=p.querySelector('.flight-details');
+ if(run.discoveries?.found.length)for(const id of run.discoveries.found){const memory=Object.values(CatDiscovery.MEMORIES).find(m=>m.id===id);if(memory)note(details,'Discovery: '+memory.title+' · saved as a keepsake')}
+ if(report?.milestones?.length){const badge=document.createElement('div');badge.className='milestone-banner';badge.setAttribute('role','status');badge.textContent='New badge: '+report.milestones[0].title+(report.milestones.length>1?' +'+(report.milestones.length-1)+' more':'');p.append(badge);for(const m of report.milestones)note(details,'Badge earned: '+m.title+' · '+m.text)}
  if(run.mischief){
   const m=run.mischief.counts,parts=[];
   if(m.pots)parts.push(m.pots+' flowerpot'+(m.pots===1?'':'s')+' smashed');
@@ -209,7 +221,7 @@ $('#pause').onclick=pause;
 $('#skip-lesson').onclick=()=>start(false);
 $('.brand').onclick=e=>{e.preventDefault();menu()};
 $('#sound').onclick=()=>{audio.init();save.settings.mute=!save.settings.mute;applySettings();store.write()};
-window.addEventListener('storage',e=>{if(e.key!=='catastrophe-v1')return;store.sync();selected=save.selected;applySettings();if(mode==='menu')menu();else if(mode==='collection')collection();else if(mode==='closet')closet();else if(mode==='missions')missions()});
+window.addEventListener('storage',e=>{if(e.key!=='catastrophe-v1')return;store.sync();selected=save.selected;applySettings();if(mode==='menu')menu();else if(mode==='collection')collection();else if(mode==='closet')closet();else if(mode==='missions')missions();else if(mode==='milestones')milestones()});
 window.addEventListener('blur',()=>{if(mode==='playing')pause()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&mode==='playing')pause()});
 function frame(ms){

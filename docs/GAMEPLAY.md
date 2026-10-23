@@ -58,3 +58,13 @@ Choose Classic or Relaxed on the home screen. The choice lasts for the current p
 Classic retains its original physics/generation/speed and competitive eligibility. Relaxed uses the same flap/gravity and cat traits, but travels at 105 rising gradually to 130 logical units/s before cat multipliers, with 390 spacing and gap sizes tapering from 280 to a minimum of 248. Centers vary less, the first three gates are laundry, optional mischief starts later, and the vacuum encounter begins after 18 cleared gates instead of nine. Its encounter gap is 280. First obstacle approach offers more reaction time.
 
 Relaxed starts with two rescues; subsequent heart pickups still cap at two. It is forgiving, not invincible. Protection/death rules are otherwise unchanged. Results save only relaxedBest locally, not fish, tokens, missions, achievements, normal best or Daily scores. No online ticket or submission form is requested. Classic/Daily and tutorial/lab reward rules remain as before. Human playtesting should tune comfort without silently changing competitive rules.
+
+## Personal milestones
+
+Open Milestones from home to see badge progress. Finish a first flight, pass ten obstacles in one flight, collect fifty fish cumulatively, or finish five flights. Existing minute-long flight, 3× dodge combo, twelve-obstacle exploration and six obstacles without using a rescue badges are also presented with friendly names. All qualifying progress comes from settled Classic/Daily flights. Relaxed, tutorial and lab do not advance these records.
+
+Badges grant no extra currency. Results show a brief static message for newly earned badges, with full details inside Flight details. Each badge is earned once per local save. Existing badge IDs remain valid. Old cumulative totals contribute to new goals; old saves lack some best-flight measurements, which start at zero unless the associated badge is already earned. New qualifying achievements are evaluated at the next completed eligible flight, not during launch.
+
+
+### Relaxed discoveries
+Optional three-star trails offer one saved keepsake for Luna, Coco and Pepe. Catch every star in a trail, then finish the flight to save it. Check Milestones → Relaxed discoveries. Skipping trails has no penalty; they award no points or currency. Classic/Daily have no trails. Gentle background weather and cat-themed scenery respect reduced motion.

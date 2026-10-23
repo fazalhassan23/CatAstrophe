@@ -131,3 +131,20 @@ No verified release tag/version is assigned here. Historical implementation note
 - Added optional Relaxed flights with slower travel, wider gradually narrowing gaps, simple opening hazards, delayed mischief/encounter and two starting hearts. Classic/Daily curves remain unchanged for leaderboard comparability.
 - Added separate local Relaxed best, clearly labeled mode/results, no Relaxed banked progression, no online ticket/form, and rejection of explicitly non-Classic competitive submissions. Old saves default the new record field safely; Daily overrides the selected style.
 - 83 tests pass and build succeeds. Browser visual review remains blocked; human balancing review is pending.
+
+## Stage 4 follow-up — 2026-10-23 (unreleased)
+
+- Added a Milestones page with eight friendly badge goals and progress bars, reusing existing achievement IDs and adding 10-obstacle, 50-fish and five-flight goals.
+- Added sanitized best-flight records, cross-tab max merging and once-only award reporting. Old badges stay earned; no bonus currency is granted. Classic/Daily qualify; practice/lab/Relaxed stay isolated.
+- Results show a compact static new-badge message; full earned badge details are inside Flight details. No midflight interruption.
+- 91 tests pass; build succeeds. Browser visual review remains blocked.
+
+
+## Stage 5 — discovery and variety (2026-10-23)
+Implemented gentle decorative rain, kitchen crumbs and dream fireflies behind hazards, plus Luna’s butterfly, Coco’s cloud and Pepe’s cozy box. Effects use simulation time and deterministic formulas, never course RNG; reduced motion suppresses the new ambient effects. Approved character artwork and physics are preserved.
+
+Added optional three-star trails in Relaxed mode only, starting at obstacle ID 3 and every fourth obstacle thereafter, outside active encounters/practice/lab. Stars sit ahead of the next obstacle within its central corridor. They do not affect collision, score, fish, charge, hearts, currencies, missions or competitive rankings. This is a small secret-path prototype, not a branching world. Catching all three saves a per-cat keepsake after a completed flight. The Milestones screen includes a discovery journal; repeats do not duplicate saved keepsakes. A restarted or unfinished flight does not save a discovery.
+
+Implementation: src/discoveries.js (optional system), src/core.js (spawn/update hooks), src/render.js (background and trail drawing), src/save.js (validated discoveries array and cross-tab union), src/app.js (journal/results), index.html (module order), tests/discoveries.cjs. No new dependencies, database schema or deployment environment variables. Rebuild dist/cat-astrophe.html before release.
+
+Validation: 97 tests pass; npm run build succeeds. New regressions cover unchanged course generation/RNG, point-free collection for every cat, pause/expiry, mode exclusions, restart, old-save normalization, stale-tab merging, deterministic/bounded reduced-motion ambience and finite balanced canvas drawing. Browser automation remains blocked by launcher startup on an unrelated locked BitLocker D: drive. No current visual, responsive, physical-device performance or human difficulty sign-off is claimed. Review on narrow phones, landscape phones, tablets and desktop before publishing; confirm trail contrast, readable warnings, journal navigation and unobscured hazards.

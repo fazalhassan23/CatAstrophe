@@ -8,7 +8,7 @@ const TYPES=['laundry','pigeon','vacuum','toast','fan','yarn'];
 const ROSTER={biscuit:{name:'Luna',title:'THE LITTLE SPARK',description:'A tiny girl who found warmth, love, and her playful spirit.',trait:'Steady flight. A playful little spark.',gravity:1,flap:1,speed:1,cost:0},mochi:{name:'Coco',title:'THE GENTLE SOUL',description:'Happiest in your lap, always close by. A gentle boy, dearly remembered.',trait:'18% lighter gravity, softer flaps, 7% slower flight.',gravity:.82,flap:.9,speed:.93,cost:20},pounce:{name:'Pepe',title:'THE LITTLE LION',description:'King of the house, with a soft spot for his human mom.',trait:'Sharper flaps, heavier fall. Precision Air Pounce ability.',gravity:1.08,flap:1.06,speed:1,cost:45}};
 function rectDistance(x,y,r){return Math.hypot(x-clamp(x,r.x,r.x+r.w),y-clamp(y,r.y,r.y+r.h))}
 class Run{
- constructor(seed=1,cat='biscuit',options={}){this.mode=options.mode==='relaxed'?'relaxed':'classic';this.seed=seed;this.rand=random(seed);this.rewardRand=random((seed^0x9e3779b9)>>>0);this.cat=ROSTER[cat]?cat:'biscuit';this.trait=ROSTER[this.cat];this.state='playing';this.time=0;this.distance=0;this.score=0;this.fish=0;this.passed=0;this.y=350;this.vy=0;this.flapAge=1;this.gates=[];this.items=[];this.events=[];this.next=this.mode==='relaxed'?260:220;this.center=350;this.id=0;this.death='';this.world=0;this.near=0;this.combo=0;this.bestCombo=0;this.comboTimer=0;this.slow=0;this.armor=0;this.tangle=0;this.taps=0;this.invuln=0;this.mood='curious';this.moodTime=0;this.stats={pass:0,fish:0,near:0,world:0};this.escapes=0;this.blocks=0;this.nip=0;this.magnet=0;this.dash=0;this.charge=0;this.cooldown=0;this.rescues=this.mode==='relaxed'?2:0;this.usedRescues=0;this.tokens=0;this.dashes=0;this.flaps=0;this.mischief=root.CatMischief?new root.CatMischief.System(this):null;}
+ constructor(seed=1,cat='biscuit',options={}){this.mode=options.mode==='relaxed'?'relaxed':'classic';this.seed=seed;this.rand=random(seed);this.rewardRand=random((seed^0x9e3779b9)>>>0);this.cat=ROSTER[cat]?cat:'biscuit';this.trait=ROSTER[this.cat];this.state='playing';this.time=0;this.distance=0;this.score=0;this.fish=0;this.passed=0;this.y=350;this.vy=0;this.flapAge=1;this.gates=[];this.items=[];this.events=[];this.next=this.mode==='relaxed'?260:220;this.center=350;this.id=0;this.death='';this.world=0;this.near=0;this.combo=0;this.bestCombo=0;this.comboTimer=0;this.slow=0;this.armor=0;this.tangle=0;this.taps=0;this.invuln=0;this.mood='curious';this.moodTime=0;this.stats={pass:0,fish:0,near:0,world:0};this.escapes=0;this.blocks=0;this.nip=0;this.magnet=0;this.dash=0;this.charge=0;this.cooldown=0;this.rescues=this.mode==='relaxed'?2:0;this.usedRescues=0;this.tokens=0;this.dashes=0;this.flaps=0;this.discoveries=root.CatDiscovery?new root.CatDiscovery.System(this):null;this.mischief=root.CatMischief?new root.CatMischief.System(this):null;}
  emit(type,data={}){this.events.push({type,...data})}
  drain(){const e=this.events;this.events=[];return e}
  flap(){if(this.state!=='playing')return;if(this.tangle>0){this.taps++;if(this.taps>=3)this.escape();return}this.flaps++;this.vy=C.impulse*this.trait.flap*(this.armor>0?.93:1);this.flapAge=0;this.emit('flap')}
@@ -34,7 +34,7 @@ class Run{
   for(let j=0;j<3;j++)this.items.push({x:g.x+15+j*34,y:g.center+Math.sin(j)*22,kind:j===1&&g.id%4===3?'gold':'fish',taken:false});
   if(g.id%2===1)this.items.push({x:g.x-60,y:g.center,kind:['box','magnet','nip','yarn','mystery','life'][Math.floor(g.id/2)%6],taken:false});
   this.mischief?.spawn(g);
-  this.emit('warning',{text:({laundry:'Laundry day. Mind the socks!',pigeon:'Pigeon patrol. Watch the dotted path.',vacuum:'Vacuum ahead. Stay out of the suction.',toast:'Toast incoming. Follow the crumbs.',fan:'Fan ahead. Ride the visible breeze.',yarn:'Yarn trap. Tangled? Tap three times to escape.'})[type]});
+  this.emit('warning',{text:({laundry:'Laundry day. Mind the socks!',pigeon:'Pigeon patrol. Watch the dotted path.',vacuum:'Vacuum ahead. Stay out of the suction.',toast:'Toast incoming. Follow the crumbs.',fan:'Fan ahead. Ride the visible breeze.',yarn:'Yarn trap. Tangled? Tap three times to escape.'})[type]});this.discoveries?.spawn(g);
  }
  shapes(g){
   const top=g.center-g.gap/2,bottom=g.center+g.gap/2,x=g.x;
@@ -72,7 +72,7 @@ class Run{
    }
   }
   for(const f of this.items){f.x-=dx;const d=Math.hypot(f.x-C.x,f.y-this.y);if(this.magnet>0&&['fish','gold','mystery'].includes(f.kind)&&d<155&&d>1){const pull=Math.min(1,dt*6);f.x+=(C.x-f.x)*pull;f.y+=(this.y-f.y)*pull}if(d<C.r+12)this.collect(f)}
-  this.mischief?.step(dt,dx);if(this.state!=='playing')return;
+  this.mischief?.step(dt,dx);this.discoveries?.step(dt,dx);if(this.state!=='playing')return;
   if(this.y<C.r+45||this.y>C.floor-C.r){const reason=this.y<C.r+45?'ceiling':'ground';if(this.invuln>0){this.y=clamp(this.y,C.r+45,C.floor-C.r);this.vy=reason==='ceiling'?100:-130}else if(!this.rescue())this.end(reason)}
   this.gates=this.gates.filter(g=>g.x>-160);this.items=this.items.filter(f=>f.x>-30&&!f.taken);
  }
