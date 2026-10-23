@@ -64,6 +64,8 @@ input,select,textarea{font-size:16px}.global-scores input{font-size:16px}button,
 .panel-menu .menu-help{margin-top:6px;padding-top:0}.panel-menu .menu-help:not([open]){border-top:0}
 @media(max-height:720px){.panel-menu .home-room{max-height:85px;margin:4px auto}.panel-menu .home-choices{margin:5px 0}.panel-menu .meta{gap:30px}.panel-menu .menu-help summary{min-height:36px;padding:8px 0}}
 @media(orientation:landscape) and (max-height:540px){.panel-menu .home-room{grid-column:1;grid-row:2/span 2;max-height:90px;margin:0}.panel-menu>p:not(.menu-dedication){grid-column:2;grid-row:2}.panel-menu .home-choices{grid-column:1;grid-row:4;margin:0}.panel-menu .meta{grid-column:2;grid-row:3}.panel-menu>.play{grid-column:1;grid-row:5}.panel-menu>.secondary{grid-column:1;grid-row:6}.panel-menu .menu-row{grid-column:2;grid-row:4/span 3}.panel-menu .menu-help{grid-column:1;grid-row:7}.panel-menu>.menu-dedication:last-child{grid-column:2;grid-row:7}.home-choice{font-size:10px}}
+
+.flight-styles{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:7px 0}.flight-style{min-height:44px;border:1px solid #ccd3c4;border-radius:8px;background:#fffaf0;color:var(--ink);font-size:12px;padding:8px}.flight-style.is-selected{background:#e0eadc;border-color:var(--teal);font-weight:700}.panel-menu .flight-styles+p{font-size:11px;line-height:1.4}@media(orientation:landscape) and (max-height:540px){.panel-menu .flight-styles{grid-column:1;grid-row:5}.panel-menu>.play{grid-row:6}.panel-menu>.secondary{grid-row:7}.panel-menu .flight-styles+p{grid-column:1/-1;grid-row:8}.panel-menu .menu-help{grid-row:9}.panel-menu>.menu-dedication:last-child{grid-row:9}.panel-menu .menu-row{grid-row:4/span 4}}
 </style></head>
 <body>
 <header class="masthead"><a class="brand" href="#" aria-label="CAT-ASTROPHE home">cat-astrophe<span>!</span></a><span class="edition">A SMALL GAME ABOUT BIG CAT ENERGY</span><button id="sound" class="quiet" aria-label="Toggle sound">Sound on</button></header>
@@ -90,7 +92,7 @@ const TYPES=['laundry','pigeon','vacuum','toast','fan','yarn'];
 const ROSTER={biscuit:{name:'Luna',title:'THE LITTLE SPARK',description:'A tiny girl who found warmth, love, and her playful spirit.',trait:'Steady flight. A playful little spark.',gravity:1,flap:1,speed:1,cost:0},mochi:{name:'Coco',title:'THE GENTLE SOUL',description:'Happiest in your lap, always close by. A gentle boy, dearly remembered.',trait:'18% lighter gravity, softer flaps, 7% slower flight.',gravity:.82,flap:.9,speed:.93,cost:20},pounce:{name:'Pepe',title:'THE LITTLE LION',description:'King of the house, with a soft spot for his human mom.',trait:'Sharper flaps, heavier fall. Precision Air Pounce ability.',gravity:1.08,flap:1.06,speed:1,cost:45}};
 function rectDistance(x,y,r){return Math.hypot(x-clamp(x,r.x,r.x+r.w),y-clamp(y,r.y,r.y+r.h))}
 class Run{
- constructor(seed=1,cat='biscuit'){this.seed=seed;this.rand=random(seed);this.rewardRand=random((seed^0x9e3779b9)>>>0);this.cat=ROSTER[cat]?cat:'biscuit';this.trait=ROSTER[this.cat];this.state='playing';this.time=0;this.distance=0;this.score=0;this.fish=0;this.passed=0;this.y=350;this.vy=0;this.flapAge=1;this.gates=[];this.items=[];this.events=[];this.next=220;this.center=350;this.id=0;this.death='';this.world=0;this.near=0;this.combo=0;this.bestCombo=0;this.comboTimer=0;this.slow=0;this.armor=0;this.tangle=0;this.taps=0;this.invuln=0;this.mood='curious';this.moodTime=0;this.stats={pass:0,fish:0,near:0,world:0};this.escapes=0;this.blocks=0;this.nip=0;this.magnet=0;this.dash=0;this.charge=0;this.cooldown=0;this.rescues=0;this.usedRescues=0;this.tokens=0;this.dashes=0;this.flaps=0;this.mischief=root.CatMischief?new root.CatMischief.System(this):null;}
+ constructor(seed=1,cat='biscuit',options={}){this.mode=options.mode==='relaxed'?'relaxed':'classic';this.seed=seed;this.rand=random(seed);this.rewardRand=random((seed^0x9e3779b9)>>>0);this.cat=ROSTER[cat]?cat:'biscuit';this.trait=ROSTER[this.cat];this.state='playing';this.time=0;this.distance=0;this.score=0;this.fish=0;this.passed=0;this.y=350;this.vy=0;this.flapAge=1;this.gates=[];this.items=[];this.events=[];this.next=this.mode==='relaxed'?260:220;this.center=350;this.id=0;this.death='';this.world=0;this.near=0;this.combo=0;this.bestCombo=0;this.comboTimer=0;this.slow=0;this.armor=0;this.tangle=0;this.taps=0;this.invuln=0;this.mood='curious';this.moodTime=0;this.stats={pass:0,fish:0,near:0,world:0};this.escapes=0;this.blocks=0;this.nip=0;this.magnet=0;this.dash=0;this.charge=0;this.cooldown=0;this.rescues=this.mode==='relaxed'?2:0;this.usedRescues=0;this.tokens=0;this.dashes=0;this.flaps=0;this.mischief=root.CatMischief?new root.CatMischief.System(this):null;}
  emit(type,data={}){this.events.push({type,...data})}
  drain(){const e=this.events;this.events=[];return e}
  flap(){if(this.state!=='playing')return;if(this.tangle>0){this.taps++;if(this.taps>=3)this.escape();return}this.flaps++;this.vy=C.impulse*this.trait.flap*(this.armor>0?.93:1);this.flapAge=0;this.emit('flap')}
@@ -110,8 +112,8 @@ class Run{
  end(reason){if(this.state!=='playing')return;if(this.tutorial){this.y=clamp(this.y,120,580);this.vy=-100;this.emit('practice',{text:'Safe practice! A gentle bounce. Try a small flap.'});return;}this.state='over';this.death=reason;this.mood='spooked';this.emit('over',{reason})}
  beginEncounter(){if(this.encounterSeen)return;this.encounterSeen=true;this.encounter=10;this.emit('world',{text:'THE GIANT VACUUM · fly through the open gaps for 10s'})}
  spawn(){
-  const type=this.encounter>0?'vacuum':TYPES[this.id%TYPES.length],gap=this.encounter>0?230:C.gap-Math.min(24,this.id*1.2);
-  this.center=clamp(this.center+(this.rand()-.5)*120,220,480);
+  const relaxed=this.mode==='relaxed',type=this.encounter>0?'vacuum':relaxed&&this.id<3?'laundry':TYPES[this.id%TYPES.length],gap=relaxed?(this.encounter>0?280:280-Math.min(32,this.id*2)):(this.encounter>0?230:C.gap-Math.min(24,this.id*1.2));
+  this.center=clamp(this.center+(this.rand()-.5)*(this.mode==='relaxed'?80:120),220,480);
   const g={id:this.id++,x:510,center:this.center,gap,type,age:0,passed:false};this.gates.push(g);
   for(let j=0;j<3;j++)this.items.push({x:g.x+15+j*34,y:g.center+Math.sin(j)*22,kind:j===1&&g.id%4===3?'gold':'fish',taken:false});
   if(g.id%2===1)this.items.push({x:g.x-60,y:g.center,kind:['box','magnet','nip','yarn','mystery','life'][Math.floor(g.id/2)%6],taken:false});
@@ -135,9 +137,9 @@ class Run{
   if(this.tangle>0){this.tangle-=dt;if(this.tangle<=0)this.escape();dt*=.25}
   if(this.moodTime<=0)this.mood=this.gates.some(g=>Math.abs(g.x-C.x)<140)?'spooked':this.time%12>10?'sleepy':'curious';
   if(this.slow>0)dt*=.7;
-  const speed=(C.speed+Math.min(38,this.passed*1.3))*this.trait.speed;const dx=speed*dt*(this.dash>0?1.85:1);
+  const speed=(this.mode==='relaxed'?105+Math.min(25,this.passed):C.speed+Math.min(38,this.passed*1.3))*this.trait.speed;const dx=speed*dt*(this.dash>0?1.85:1);
   this.distance+=dx;const distanceScore=Math.floor(this.distance/80);this.score+=distanceScore-(this.stats.distance||0);this.stats.distance=distanceScore;
-  this.next-=dx;if(this.next<=0){this.spawn();this.next+=C.spacing}
+  this.next-=dx;if(this.next<=0){this.spawn();this.next+=this.mode==='relaxed'?390:C.spacing}
   let force=0;
   for(const g of this.gates){g.x-=dx;g.age+=dt;if(g.type==='vacuum'&&Math.abs(g.x-C.x)<130&&this.y>g.center)force+=110*(1-Math.abs(g.x-C.x)/130);if(g.type==='fan'&&Math.abs(g.x-C.x)<80&&this.y>g.center)force-=135}
   this.vy=clamp(this.vy+(C.gravity*this.trait.gravity*(this.world===2?.92:1)*(this.armor>0?1.16:1)+force)*dt,-420,C.maxFall);this.y+=this.vy*dt;
@@ -147,8 +149,8 @@ class Run{
    if(d>=C.r&&d<C.r+14&&!g.ignored&&this.invuln<=0)g.near=true;
    if(!g.passed&&g.x+100<C.x){g.passed=true;this.passed++;this.score+=10;this.stats.pass+=10;this.emit('pass');
     if(g.near&&!g.ignored){this.near++;this.combo=Math.min(5,this.combo+1);this.bestCombo=Math.max(this.bestCombo,this.combo);this.comboTimer=7;const points=5*this.combo;this.score+=points;this.stats.near+=points;this.charge=clamp(this.charge+22,0,100);this.slow=.17;this.moodSet('proud');this.emit('near',{text:'PAW-SOME DODGE!  ×'+this.combo})}
-    if(this.passed===8)this.emit('warning',{text:'Something enormous is plugging itself in…'});
-    if(this.passed===9)this.beginEncounter();
+    if(this.passed===(this.mode==='relaxed'?17:8))this.emit('warning',{text:'Something enormous is plugging itself in…'});
+    if(this.passed===(this.mode==='relaxed'?18:9))this.beginEncounter();
     if(this.passed%6===5)this.emit('warning',{text:['Kitchen portal ahead. Keep flapping!','Dream portal ahead. Gravity gets lighter.','Neighborhood portal ahead. Gravity returns.'][this.world]});
     if(this.passed%6===0){this.world=(this.world+1)%3;this.score+=20;this.stats.world+=20;this.emit('world',{text:['BACK IN THE NEIGHBORHOOD','THE KITCHEN DIMENSION','THE CAT’S DREAM · lighter gravity'][this.world]})}
    }
@@ -168,7 +170,7 @@ const {C,clamp}=CatCore;
 const TARGETS={pot:{label:'FLOWERPOT',points:12,fish:2},toast:{label:'STOLEN TOAST',points:8,fish:3},bell:{label:'DOORBELL',points:10,fish:2}};
 class System{
  constructor(run){this.run=run;this.targets=[];this.reactions=[];this.counts={pots:0,toast:0,bells:0,pigeons:0};this.serial=0}
- spawn(g){if(g.id<3||g.id%3!==0||this.run.encounter>0)return;const type=['pot','toast','bell'][this.serial%3];this.add(type,g.x-155,g.center-35)}
+ spawn(g){if(g.id<(this.run.mode==='relaxed'?6:3)||g.id%3!==0||this.run.encounter>0)return;const type=['pot','toast','bell'][this.serial%3];this.add(type,g.x-155,g.center-35)}
  add(type,x,y){const target={id:this.serial++,type,x,y:clamp(y,150,550),hit:false,age:0};this.targets.push(target);return target}
  award(points,fish){const r=this.run;r.score+=points;r.stats.mischief=(r.stats.mischief||0)+points;r.fish+=fish}
  strike(t){if(t.hit)return false;const r=this.run;t.hit=true;t.age=0;const reward=TARGETS[t.type];this.award(reward.points,reward.fish);this.counts[t.type==='pot'?'pots':t.type==='toast'?'toast':'bells']++;r.moodSet('proud',1.3);
@@ -228,9 +230,9 @@ root.CatTraining={Walkthrough,STEPS};if(typeof module!=='undefined')module.expor
 </script><script>/* Versioned local progression; invalid fields discarded independently. */
 (function(root){
 const {ROSTER}=CatCore,KEY='catastrophe-v1';
-const defaults=()=>({version:1,walkthroughComplete:false,best:0,balance:0,tokens:0,unlocked:['biscuit'],outfits:['none'],selected:'biscuit',outfit:'none',totals:{fish:0,near:0,worlds:0,escapes:0,dashes:0,runs:0},missions:[],achievements:[],daily:{},settings:{fx:.45,music:.12,mute:false,motion:true}});
+const defaults=()=>({version:1,walkthroughComplete:false,best:0,relaxedBest:0,balance:0,tokens:0,unlocked:['biscuit'],outfits:['none'],selected:'biscuit',outfit:'none',totals:{fish:0,near:0,worlds:0,escapes:0,dashes:0,runs:0},missions:[],achievements:[],daily:{},settings:{fx:.45,music:.12,mute:false,motion:true}});
 const num=(n,max=1e9)=>typeof n==='number'&&Number.isFinite(n)?Math.min(max,Math.max(0,n)):0;
-function normalize(v){const d=defaults();if(!v||typeof v!=='object')return d;d.walkthroughComplete=v.walkthroughComplete===true;for(const k of ['best','balance','tokens'])d[k]=Math.floor(num(v[k]));d.unlocked=[...new Set(['biscuit',...(Array.isArray(v.unlocked)?v.unlocked:[]).filter(k=>ROSTER[k])])];d.outfits=[...new Set(['none',...(Array.isArray(v.outfits)?v.outfits:[]).filter(k=>['goggles','crown'].includes(k))])];if(d.unlocked.includes(v.selected))d.selected=v.selected;if(d.outfits.includes(v.outfit))d.outfit=v.outfit;for(const k of Object.keys(d.totals))d.totals[k]=Math.floor(num(v.totals?.[k]));d.missions=Array.isArray(v.missions)?v.missions.filter(k=>typeof k==='string'):[];d.achievements=Array.isArray(v.achievements)?v.achievements.filter(k=>typeof k==='string'):[];if(v.settings){for(const k of ['fx','music'])if(typeof v.settings[k]==='number')d.settings[k]=num(v.settings[k],1);for(const k of ['mute','motion'])if(typeof v.settings[k]==='boolean')d.settings[k]=v.settings[k]}if(v.daily&&typeof v.daily==='object')for(const [k,n]of Object.entries(v.daily).slice(-30))if(/^\d{4}-\d{2}-\d{2}$/.test(k))d.daily[k]=Math.floor(num(n));return d}
+function normalize(v){const d=defaults();if(!v||typeof v!=='object')return d;d.walkthroughComplete=v.walkthroughComplete===true;for(const k of ['best','relaxedBest','balance','tokens'])d[k]=Math.floor(num(v[k]));d.unlocked=[...new Set(['biscuit',...(Array.isArray(v.unlocked)?v.unlocked:[]).filter(k=>ROSTER[k])])];d.outfits=[...new Set(['none',...(Array.isArray(v.outfits)?v.outfits:[]).filter(k=>['goggles','crown'].includes(k))])];if(d.unlocked.includes(v.selected))d.selected=v.selected;if(d.outfits.includes(v.outfit))d.outfit=v.outfit;for(const k of Object.keys(d.totals))d.totals[k]=Math.floor(num(v.totals?.[k]));d.missions=Array.isArray(v.missions)?v.missions.filter(k=>typeof k==='string'):[];d.achievements=Array.isArray(v.achievements)?v.achievements.filter(k=>typeof k==='string'):[];if(v.settings){for(const k of ['fx','music'])if(typeof v.settings[k]==='number')d.settings[k]=num(v.settings[k],1);for(const k of ['mute','motion'])if(typeof v.settings[k]==='boolean')d.settings[k]=v.settings[k]}if(v.daily&&typeof v.daily==='object')for(const [k,n]of Object.entries(v.daily).slice(-30))if(/^\d{4}-\d{2}-\d{2}$/.test(k))d.daily[k]=Math.floor(num(n));return d}
 const MISSIONS=[{id:'fish',title:'A decent lunch',text:'Collect 15 fish across flights.',goal:15,stat:'fish',reward:10},{id:'near',title:'Living on the edge',text:'Make 3 successful near misses.',goal:3,stat:'near',reward:15},{id:'worlds',title:'Wrong turn at the sky',text:'Discover the Kitchen Dimension.',goal:1,stat:'worlds',reward:15},{id:'escapes',title:'Unbe-weave-able',text:'Escape one yarn tangle.',goal:1,stat:'escapes',reward:8},{id:'dashes',title:'Unscheduled acceleration',text:'Activate Zoomies or Pounce 3 times.',goal:3,stat:'dashes',reward:15}];
 class Store{
  constructor(storage){this.storage=storage;this.credited=new WeakSet();this.available=!!storage;try{this.data=normalize(JSON.parse(storage?.getItem(KEY)||'null'))}catch{this.data=defaults()}this.baseline=structuredClone(this.data)}
@@ -241,7 +243,7 @@ class Store{
    const latest=normalize(JSON.parse(raw)),local=this.data,base=this.baseline;
    // Rebase local changes onto current storage. Currency changes include spending.
    for(const k of ['balance','tokens'])latest[k]=Math.max(0,latest[k]+local[k]-base[k]);
-   latest.best=Math.max(latest.best,local.best);
+   latest.best=Math.max(latest.best,local.best);latest.relaxedBest=Math.max(latest.relaxedBest,local.relaxedBest);
    for(const k of ['unlocked','outfits','missions','achievements'])latest[k]=[...new Set([...latest[k],...local[k]])];
    for(const k of Object.keys(latest.totals))latest.totals[k]+=Math.max(0,local.totals[k]-base.totals[k]);
    for(const [k,v]of Object.entries(local.daily))latest.daily[k]=Math.max(latest.daily[k]||0,v);
@@ -255,7 +257,7 @@ class Store{
  buyCat(id){this.sync();const c=ROSTER[id],d=this.data;if(!c||d.unlocked.includes(id)||d.balance<c.cost)return false;d.balance-=c.cost;d.unlocked.push(id);this.write();return true}
  selectCat(id){this.sync();if(!this.data.unlocked.includes(id))return false;this.data.selected=id;this.write();return true}
  buyOutfit(id){this.sync();const d=this.data;if(d.outfits.includes(id)||!['goggles','crown'].includes(id))return false;const currency=id==='crown'?'tokens':'balance',cost=id==='crown'?3:15;if(d[currency]<cost)return false;d[currency]-=cost;d.outfits.push(id);d.outfit=id;this.write();return true}
- settle(run,daily=''){if(run.lab||run.tutorial||run.state!=='over'||this.credited.has(run))return null;this.credited.add(run);this.sync();const d=this.data,newBest=run.score>d.best;d.best=Math.max(d.best,run.score);d.balance+=run.fish;d.tokens+=run.tokens;d.totals.runs++;d.totals.fish+=run.fish;d.totals.near+=run.near;d.totals.worlds+=Math.floor(run.passed/6);d.totals.escapes+=run.escapes;d.totals.dashes+=run.dashes;const completed=[];for(const m of MISSIONS)if(!d.missions.includes(m.id)&&d.totals[m.stat]>=m.goal){d.missions.push(m.id);d.balance+=m.reward;completed.push(m)}for(const [id,yes]of [['first-flight',true],['minute-menace',run.time>=60],['combo-three',run.bestCombo>=3],['world-tour',run.passed>=12],['no-rescue',run.passed>=6&&run.usedRescues===0]])if(yes&&!d.achievements.includes(id))d.achievements.push(id);if(daily)d.daily[daily]=Math.max(d.daily[daily]||0,run.score);this.write();return{newBest,completed}}
+ settle(run,daily=''){if(run.lab||run.tutorial||run.state!=='over'||this.credited.has(run))return null;this.credited.add(run);this.sync();const d=this.data;if(run.mode==='relaxed'){const newBest=run.score>d.relaxedBest;d.relaxedBest=Math.max(d.relaxedBest,run.score);this.write();return{newBest,completed:[],relaxed:true}}const newBest=run.score>d.best;d.best=Math.max(d.best,run.score);d.balance+=run.fish;d.tokens+=run.tokens;d.totals.runs++;d.totals.fish+=run.fish;d.totals.near+=run.near;d.totals.worlds+=Math.floor(run.passed/6);d.totals.escapes+=run.escapes;d.totals.dashes+=run.dashes;const completed=[];for(const m of MISSIONS)if(!d.missions.includes(m.id)&&d.totals[m.stat]>=m.goal){d.missions.push(m.id);d.balance+=m.reward;completed.push(m)}for(const [id,yes]of [['first-flight',true],['minute-menace',run.time>=60],['combo-three',run.bestCombo>=3],['world-tour',run.passed>=12],['no-rescue',run.passed>=6&&run.usedRescues===0]])if(yes&&!d.achievements.includes(id))d.achievements.push(id);if(daily)d.daily[daily]=Math.max(d.daily[daily]||0,run.score);this.write();return{newBest,completed}}
 }
 function dailyKey(){return new Date().toISOString().slice(0,10)}
 function dailySeed(key){return [...key].reduce((a,c)=>Math.imul(a^c.charCodeAt(0),16777619)>>>0,2166136261)}
@@ -429,13 +431,14 @@ async function list(container,board,id){
 }
 function ticket(board){return request({action:'start',board}).then(d=>({token:d.token})).catch(e=>({error:e.message}))}
 function mount(panel,run,board){
+ if(run.mode==='relaxed')return;
  const area=element('section');area.className='global-scores';area.append(element('h3','GLOBAL TOP 100'));
  const form=element('form'),label=element('label','Your nickname'),input=element('input');input.maxLength=20;input.required=true;input.autocomplete='nickname';label.append(input);
  try{input.value=localStorage.getItem('catastrophe-nickname')||''}catch{}
  const submit=element('button','Submit score');submit.type='submit';submit.className='submit-score';const status=element('p');status.setAttribute('aria-live','polite');
  form.append(label,submit);area.append(form,status);const scores=element('div'),boardDetails=element('details'),summary=element('summary','View global top 100');boardDetails.className='board-details';boardDetails.append(summary,scores);area.append(boardDetails);panel.append(area);let loaded=false;boardDetails.ontoggle=()=>{if(boardDetails.open&&!loaded){loaded=true;list(scores,board)}};
  form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;status.textContent='Submitting…';
- try{const t=await run.onlineTicket;if(!t?.token)throw Error(t?.error||'This flight has no online ticket. Start a new flight to submit.');const name=input.value.trim();const data=await request({token:t.token,name,score:run.score,seconds:run.time,cat:run.cat});try{localStorage.setItem('catastrophe-nickname',name)}catch{}status.textContent=data.accepted?'Score submitted!':'This flight was already submitted.';input.disabled=true;submit.textContent='Submitted';loaded=true;boardDetails.open=true;await list(scores,board,data.id)}
+ try{const t=await run.onlineTicket;if(!t?.token)throw Error(t?.error||'This flight has no online ticket. Start a new flight to submit.');const name=input.value.trim();const data=await request({token:t.token,name,score:run.score,seconds:run.time,cat:run.cat,mode:run.mode||'classic'});try{localStorage.setItem('catastrophe-nickname',name)}catch{}status.textContent=data.accepted?'Score submitted!':'This flight was already submitted.';input.disabled=true;submit.textContent='Submitted';loaded=true;boardDetails.open=true;await list(scores,board,data.id)}
  catch(err){status.textContent=err.message;submit.disabled=false}
  };
 }
@@ -472,7 +475,7 @@ let storage;try{storage=localStorage}catch{}
 const store=new CatSave.Store(storage),save=store.data,params=new URLSearchParams(location.search);
 renderer.c.scale(2,2);
 let run=null,mode='menu',acc=0,last=0,toastTime=0,selected=save.selected,daily='',report=null,trainer=null;
-let photoDialog=null;
+let photoDialog=null,flightStyle='classic';
 function applySettings(){
  audio.volume=save.settings.mute?0:save.settings.fx;
  audio.music=save.settings.mute?0:save.settings.music;
@@ -486,7 +489,7 @@ function friendlyHint(text){const h=flightHelp();return text.replaceAll('Tap the
 function note(p,text){const n=document.createElement('p');n.textContent=text;p.append(n)}
 function menu(){
  mode='menu';run=null;trainer=null;$('#lesson').hidden=true;$('#toast').textContent='';daily='';$('#hud').hidden=true;$('#live-controls').hidden=true;updateCat();
- const p=show('<span class="eyebrow">LET’S HELP YOUR CAT FLY</span><h2>cat-astrophe!</h2><canvas class="home-room" width="600" height="230" role="img" aria-label="Luna, Coco and Pepe together in their cozy room. Choose a flying friend below."></canvas><p>Catch fish. Dodge obstacles. Come home together.</p><div class="meta"><span><b>'+save.best+'</b>PERSONAL BEST</span><span><b>'+save.balance+'</b>FISH BANK</span></div>');
+ const p=show('<span class="eyebrow">LET’S HELP YOUR CAT FLY</span><h2>cat-astrophe!</h2><canvas class="home-room" width="600" height="230" role="img" aria-label="Luna, Coco and Pepe together in their cozy room. Choose a flying friend below."></canvas><p>Catch fish. Dodge obstacles. Come home together.</p><div class="meta"><span><b>'+(flightStyle==='relaxed'?save.relaxedBest:save.best)+'</b>'+(flightStyle==='relaxed'?'RELAXED BEST':'CLASSIC BEST')+'</span><span><b>'+save.balance+'</b>FISH BANK</span></div>');
  const choices=document.createElement('div');choices.className='home-choices';choices.setAttribute('role','group');choices.setAttribute('aria-label','Choose your flying friend');
  for(const [id,cat]of Object.entries(ROSTER)){
   const owned=save.unlocked.includes(id),isSelected=selected===id;
@@ -496,6 +499,10 @@ function menu(){
   });choose.className='home-choice'+(isSelected?' is-selected':'');choose.setAttribute('aria-pressed',String(isSelected));choose.setAttribute('aria-label',owned?cat.name+(isSelected?', selected for flight':', select for flight'):cat.name+', locked. Unlock for '+cat.cost+' fish in Cats');choices.append(choose);
  }
  p.append(choices);
+ const styles=document.createElement('div');styles.className='flight-styles';styles.setAttribute('role','group');styles.setAttribute('aria-label','Flight difficulty');
+ for(const [id,label]of [['classic','Classic flight'],['relaxed','Relaxed flight']]){const option=button(label,()=>{flightStyle=id;menu()});option.className='flight-style'+(flightStyle===id?' is-selected':'');option.setAttribute('aria-pressed',String(flightStyle===id));styles.append(option)}p.append(styles);
+ note(p,flightStyle==='relaxed'?'Relaxed: wide gaps, slower flight, 2 hearts. Local best only; no banked rewards.':'Classic: the original challenge. Earn fish and compete online.');
+
  p.append(button(save.walkthroughComplete?'Let’s play  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
  if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
  const row=document.createElement('div');row.className='menu-row';
@@ -582,8 +589,8 @@ function start(isDaily=!!daily,practice=false){
  trainer=null;$('#lesson').hidden=true;$('#toast').textContent='';
  audio.init();daily=isDaily?CatSave.dailyKey():'';
  const seed=params.has('seed')?Number(params.get('seed'))>>>0:Date.now()>>>0;
- run=new Run(daily?CatSave.dailySeed(daily):seed,daily?'biscuit':selected);
- if(rootBoard()&&!practice&&!params.has('dev'))run.onlineTicket=CatBoard.ticket(daily?'daily':'classic');
+ run=new Run(daily?CatSave.dailySeed(daily):seed,daily?'biscuit':selected,{mode:!daily&&!practice?flightStyle:'classic'});
+ if(rootBoard()&&run.mode!=='relaxed'&&!practice&&!params.has('dev'))run.onlineTicket=CatBoard.ticket(daily?'daily':'classic');
  run.outfit=save.outfit;report=null;mode='playing';acc=0;last=0;toastTime=0;
  $('#screen').className='screen empty';$('#hud').hidden=false;$('#live-controls').hidden=false;
  renderer.particles=[];run.flap();updateCat();canvas.focus();
@@ -617,7 +624,7 @@ function resume(){if(!run)return;run.state='playing';$('#screen').className='scr
 function over(){
  mode='over';report=store.settle(run,daily);$('#live-controls').hidden=true;if(report?.newBest)audio.play('unlock');
  const names={ground:'A little tumble! Try a few small flaps.',ceiling:'A little too high! Let your cat float down.',laundry:'Watch out for the laundry next time!',pigeon:'Watch the dotted line to dodge pigeons.',vacuum:'Fly through the open gap to dodge the vacuum.',toast:'Watch out for the toast! Try again.',fan:'Give the fan a little more space.',yarn:'Caught in yarn! Tap three times to get free.'};
- const p=show('<span class="eyebrow">'+(run.lab?'LAB FLIGHT · NO REWARDS':daily?'DAILY FLIGHT · '+daily:'FLIGHT REPORT')+'</span><h2>'+(report?.newBest?'A new record!':'Nice try!')+'</h2><p>'+names[run.death]+'</p><div class="result-grid"><div><b>'+run.score+'</b>SCORE</div><div><b>'+save.best+'</b>BEST</div><div><b>'+run.fish+'</b>FISH '+(run.lab?'CAUGHT':'SAVED')+'</div><div><b>'+run.near+' / '+run.bestCombo+'×</b>NEAR MISSES / COMBO</div></div><details class="flight-details"><summary>Flight details &amp; cat adventure</summary><p>'+run.passed+' obstacles passed. Keep practicing—you’ve got this!<br>Distance '+(run.stats.distance||0)+' · Passes '+run.stats.pass+' · Fish '+run.stats.fish+'<br>Dodges '+run.stats.near+' · Worlds '+run.stats.world+' · Events '+(run.stats.event||0)+' · Mischief '+(run.stats.mischief||0)+'<br>'+run.escapes+' tangles escaped · '+run.blocks+' boxes sacrificed.</p></details>');
+ const p=show('<span class="eyebrow">'+(run.lab?'LAB FLIGHT · NO REWARDS':run.mode==='relaxed'?'RELAXED FLIGHT · LOCAL BEST ONLY':daily?'DAILY FLIGHT · '+daily:'FLIGHT REPORT')+'</span><h2>'+(report?.newBest?'A new record!':'Nice try!')+'</h2><p>'+names[run.death]+'</p><div class="result-grid"><div><b>'+run.score+'</b>SCORE</div><div><b>'+(run.mode==='relaxed'?save.relaxedBest:save.best)+'</b>BEST</div><div><b>'+run.fish+'</b>FISH '+(run.lab||run.mode==='relaxed'?'CAUGHT':'SAVED')+'</div><div><b>'+run.near+' / '+run.bestCombo+'×</b>NEAR MISSES / COMBO</div></div><details class="flight-details"><summary>Flight details &amp; cat adventure</summary><p>'+run.passed+' obstacles passed. Keep practicing—you’ve got this!<br>Distance '+(run.stats.distance||0)+' · Passes '+run.stats.pass+' · Fish '+run.stats.fish+'<br>Dodges '+run.stats.near+' · Worlds '+run.stats.world+' · Events '+(run.stats.event||0)+' · Mischief '+(run.stats.mischief||0)+'<br>'+run.escapes+' tangles escaped · '+run.blocks+' boxes sacrificed.</p></details>');
  const details=p.querySelector('.flight-details');
  if(run.mischief){
   const m=run.mischief.counts,parts=[];
@@ -629,8 +636,9 @@ function over(){
   crime.innerHTML='<b>YOUR CAT ADVENTURE</b>';const text=document.createElement('p');text.textContent=parts.length?parts.join(' · '):'A peaceful flight. Try a Zoomies dash next time!';crime.append(text);details.append(crime);
   note(details,'Mischief bonus: '+(run.stats.mischief||0)+' points');
  }
+ if(run.mode==='relaxed')note(p,'Relaxed best is saved on this device. Fish and missions stay in Classic or Daily.');
  if(report?.completed.length)note(p,report.completed.map(m=>'Mission: '+m.title+' (+'+m.reward+' fish)').join(' · '));
- if(rootBoard()&&!run.lab&&!run.tutorial&&!params.has('dev'))CatBoard.mount(p,run,daily?'daily':'classic');
+ if(rootBoard()&&run.mode!=='relaxed'&&!run.lab&&!run.tutorial&&!params.has('dev'))CatBoard.mount(p,run,daily?'daily':'classic');
  p.append(button('Again. For science.  →',()=>start(),'play'),button('Main menu',menu));
 }
 function lab(){
@@ -693,7 +701,7 @@ function frame(ms){
   $('#charge').textContent=Math.floor(run.charge)+'%';
   $('#ability').disabled=mode!=='playing'||run.charge<(run.cat==='pounce'?65:100)||run.cooldown>0;
   $('#ability').firstChild.textContent=run.cat==='pounce'?'POUNCE ':'ZOOMIES ';
-  $('#effects').textContent=[run.armor>0?'BOX '+Math.ceil(run.armor)+'s':'',run.magnet>0?'MAGNET '+Math.ceil(run.magnet)+'s':'',run.nip>0?'CATNIP '+Math.ceil(run.nip)+'s':'','♥ '+run.rescues+' / 2',run.combo?'DODGE ×'+run.combo:''].filter(Boolean).join(' · ');
+  $('#effects').textContent=[run.mode==='relaxed'?'RELAXED':'',run.armor>0?'BOX '+Math.ceil(run.armor)+'s':'',run.magnet>0?'MAGNET '+Math.ceil(run.magnet)+'s':'',run.nip>0?'CATNIP '+Math.ceil(run.nip)+'s':'','♥ '+run.rescues+' / 2',run.combo?'DODGE ×'+run.combo:''].filter(Boolean).join(' · ');
  }
  $('#lesson').hidden=!(trainer&&mode==='playing');
  toastTime=Math.max(0,toastTime-dt);$('#toast').classList.toggle('show',toastTime>0&&mode==='playing'&&!run?.tutorial);

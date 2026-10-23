@@ -8,7 +8,7 @@ const TYPES=['laundry','pigeon','vacuum','toast','fan','yarn'];
 const ROSTER={biscuit:{name:'Luna',title:'THE LITTLE SPARK',description:'A tiny girl who found warmth, love, and her playful spirit.',trait:'Steady flight. A playful little spark.',gravity:1,flap:1,speed:1,cost:0},mochi:{name:'Coco',title:'THE GENTLE SOUL',description:'Happiest in your lap, always close by. A gentle boy, dearly remembered.',trait:'18% lighter gravity, softer flaps, 7% slower flight.',gravity:.82,flap:.9,speed:.93,cost:20},pounce:{name:'Pepe',title:'THE LITTLE LION',description:'King of the house, with a soft spot for his human mom.',trait:'Sharper flaps, heavier fall. Precision Air Pounce ability.',gravity:1.08,flap:1.06,speed:1,cost:45}};
 function rectDistance(x,y,r){return Math.hypot(x-clamp(x,r.x,r.x+r.w),y-clamp(y,r.y,r.y+r.h))}
 class Run{
- constructor(seed=1,cat='biscuit'){this.seed=seed;this.rand=random(seed);this.rewardRand=random((seed^0x9e3779b9)>>>0);this.cat=ROSTER[cat]?cat:'biscuit';this.trait=ROSTER[this.cat];this.state='playing';this.time=0;this.distance=0;this.score=0;this.fish=0;this.passed=0;this.y=350;this.vy=0;this.flapAge=1;this.gates=[];this.items=[];this.events=[];this.next=220;this.center=350;this.id=0;this.death='';this.world=0;this.near=0;this.combo=0;this.bestCombo=0;this.comboTimer=0;this.slow=0;this.armor=0;this.tangle=0;this.taps=0;this.invuln=0;this.mood='curious';this.moodTime=0;this.stats={pass:0,fish:0,near:0,world:0};this.escapes=0;this.blocks=0;this.nip=0;this.magnet=0;this.dash=0;this.charge=0;this.cooldown=0;this.rescues=0;this.usedRescues=0;this.tokens=0;this.dashes=0;this.flaps=0;this.mischief=root.CatMischief?new root.CatMischief.System(this):null;}
+ constructor(seed=1,cat='biscuit',options={}){this.mode=options.mode==='relaxed'?'relaxed':'classic';this.seed=seed;this.rand=random(seed);this.rewardRand=random((seed^0x9e3779b9)>>>0);this.cat=ROSTER[cat]?cat:'biscuit';this.trait=ROSTER[this.cat];this.state='playing';this.time=0;this.distance=0;this.score=0;this.fish=0;this.passed=0;this.y=350;this.vy=0;this.flapAge=1;this.gates=[];this.items=[];this.events=[];this.next=this.mode==='relaxed'?260:220;this.center=350;this.id=0;this.death='';this.world=0;this.near=0;this.combo=0;this.bestCombo=0;this.comboTimer=0;this.slow=0;this.armor=0;this.tangle=0;this.taps=0;this.invuln=0;this.mood='curious';this.moodTime=0;this.stats={pass:0,fish:0,near:0,world:0};this.escapes=0;this.blocks=0;this.nip=0;this.magnet=0;this.dash=0;this.charge=0;this.cooldown=0;this.rescues=this.mode==='relaxed'?2:0;this.usedRescues=0;this.tokens=0;this.dashes=0;this.flaps=0;this.mischief=root.CatMischief?new root.CatMischief.System(this):null;}
  emit(type,data={}){this.events.push({type,...data})}
  drain(){const e=this.events;this.events=[];return e}
  flap(){if(this.state!=='playing')return;if(this.tangle>0){this.taps++;if(this.taps>=3)this.escape();return}this.flaps++;this.vy=C.impulse*this.trait.flap*(this.armor>0?.93:1);this.flapAge=0;this.emit('flap')}
@@ -28,8 +28,8 @@ class Run{
  end(reason){if(this.state!=='playing')return;if(this.tutorial){this.y=clamp(this.y,120,580);this.vy=-100;this.emit('practice',{text:'Safe practice! A gentle bounce. Try a small flap.'});return;}this.state='over';this.death=reason;this.mood='spooked';this.emit('over',{reason})}
  beginEncounter(){if(this.encounterSeen)return;this.encounterSeen=true;this.encounter=10;this.emit('world',{text:'THE GIANT VACUUM · fly through the open gaps for 10s'})}
  spawn(){
-  const type=this.encounter>0?'vacuum':TYPES[this.id%TYPES.length],gap=this.encounter>0?230:C.gap-Math.min(24,this.id*1.2);
-  this.center=clamp(this.center+(this.rand()-.5)*120,220,480);
+  const relaxed=this.mode==='relaxed',type=this.encounter>0?'vacuum':relaxed&&this.id<3?'laundry':TYPES[this.id%TYPES.length],gap=relaxed?(this.encounter>0?280:280-Math.min(32,this.id*2)):(this.encounter>0?230:C.gap-Math.min(24,this.id*1.2));
+  this.center=clamp(this.center+(this.rand()-.5)*(this.mode==='relaxed'?80:120),220,480);
   const g={id:this.id++,x:510,center:this.center,gap,type,age:0,passed:false};this.gates.push(g);
   for(let j=0;j<3;j++)this.items.push({x:g.x+15+j*34,y:g.center+Math.sin(j)*22,kind:j===1&&g.id%4===3?'gold':'fish',taken:false});
   if(g.id%2===1)this.items.push({x:g.x-60,y:g.center,kind:['box','magnet','nip','yarn','mystery','life'][Math.floor(g.id/2)%6],taken:false});
@@ -53,9 +53,9 @@ class Run{
   if(this.tangle>0){this.tangle-=dt;if(this.tangle<=0)this.escape();dt*=.25}
   if(this.moodTime<=0)this.mood=this.gates.some(g=>Math.abs(g.x-C.x)<140)?'spooked':this.time%12>10?'sleepy':'curious';
   if(this.slow>0)dt*=.7;
-  const speed=(C.speed+Math.min(38,this.passed*1.3))*this.trait.speed;const dx=speed*dt*(this.dash>0?1.85:1);
+  const speed=(this.mode==='relaxed'?105+Math.min(25,this.passed):C.speed+Math.min(38,this.passed*1.3))*this.trait.speed;const dx=speed*dt*(this.dash>0?1.85:1);
   this.distance+=dx;const distanceScore=Math.floor(this.distance/80);this.score+=distanceScore-(this.stats.distance||0);this.stats.distance=distanceScore;
-  this.next-=dx;if(this.next<=0){this.spawn();this.next+=C.spacing}
+  this.next-=dx;if(this.next<=0){this.spawn();this.next+=this.mode==='relaxed'?390:C.spacing}
   let force=0;
   for(const g of this.gates){g.x-=dx;g.age+=dt;if(g.type==='vacuum'&&Math.abs(g.x-C.x)<130&&this.y>g.center)force+=110*(1-Math.abs(g.x-C.x)/130);if(g.type==='fan'&&Math.abs(g.x-C.x)<80&&this.y>g.center)force-=135}
   this.vy=clamp(this.vy+(C.gravity*this.trait.gravity*(this.world===2?.92:1)*(this.armor>0?1.16:1)+force)*dt,-420,C.maxFall);this.y+=this.vy*dt;
@@ -65,8 +65,8 @@ class Run{
    if(d>=C.r&&d<C.r+14&&!g.ignored&&this.invuln<=0)g.near=true;
    if(!g.passed&&g.x+100<C.x){g.passed=true;this.passed++;this.score+=10;this.stats.pass+=10;this.emit('pass');
     if(g.near&&!g.ignored){this.near++;this.combo=Math.min(5,this.combo+1);this.bestCombo=Math.max(this.bestCombo,this.combo);this.comboTimer=7;const points=5*this.combo;this.score+=points;this.stats.near+=points;this.charge=clamp(this.charge+22,0,100);this.slow=.17;this.moodSet('proud');this.emit('near',{text:'PAW-SOME DODGE!  ×'+this.combo})}
-    if(this.passed===8)this.emit('warning',{text:'Something enormous is plugging itself in…'});
-    if(this.passed===9)this.beginEncounter();
+    if(this.passed===(this.mode==='relaxed'?17:8))this.emit('warning',{text:'Something enormous is plugging itself in…'});
+    if(this.passed===(this.mode==='relaxed'?18:9))this.beginEncounter();
     if(this.passed%6===5)this.emit('warning',{text:['Kitchen portal ahead. Keep flapping!','Dream portal ahead. Gravity gets lighter.','Neighborhood portal ahead. Gravity returns.'][this.world]});
     if(this.passed%6===0){this.world=(this.world+1)%3;this.score+=20;this.stats.world+=20;this.emit('world',{text:['BACK IN THE NEIGHBORHOOD','THE KITCHEN DIMENSION','THE CAT’S DREAM · lighter gravity'][this.world]})}
    }

@@ -50,3 +50,11 @@ Completed real flights bank fish/tokens and update local best, totals, missions,
 ## Global scores and Daily
 
 Classic retains the top 100 all-time flights, across all playable cats. Daily retains the top 100 for the current **UTC date**, forces Luna and uses a date-derived seed. Mystery reward collection does not advance course RNG. At midnight UTC the public Daily board changes; a previous day's ticket can no longer submit. Ties favor earlier submission, then run ID. One nickname can appear on multiple flights; names do not establish ownership or identity.
+
+## Flight difficulty
+
+Choose Classic or Relaxed on the home screen. The choice lasts for the current page session; retry preserves it. Daily always starts a Classic-rules flight with Luna. Walkthrough remains safe practice, separate from either score mode.
+
+Classic retains its original physics/generation/speed and competitive eligibility. Relaxed uses the same flap/gravity and cat traits, but travels at 105 rising gradually to 130 logical units/s before cat multipliers, with 390 spacing and gap sizes tapering from 280 to a minimum of 248. Centers vary less, the first three gates are laundry, optional mischief starts later, and the vacuum encounter begins after 18 cleared gates instead of nine. Its encounter gap is 280. First obstacle approach offers more reaction time.
+
+Relaxed starts with two rescues; subsequent heart pickups still cap at two. It is forgiving, not invincible. Protection/death rules are otherwise unchanged. Results save only relaxedBest locally, not fish, tokens, missions, achievements, normal best or Daily scores. No online ticket or submission form is requested. Classic/Daily and tutorial/lab reward rules remain as before. Human playtesting should tune comfort without silently changing competitive rules.

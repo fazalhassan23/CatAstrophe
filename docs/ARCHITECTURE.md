@@ -64,3 +64,7 @@ Update defaults, normalization and merge semantics; test old saves and stale tab
 ## Cozy home scene
 
 CatArt.home draws the decorative room and all three approved cats into .home-room using the existing loop. The canvas is not the input surface: adjacent native buttons expose selection/lock state to keyboard and assistive technology. Owned cat selection goes through Store.selectCat; locked selection opens collection and never buys automatically. The room honors reduced motion and shares the same character pose profiles as other previews. src/app.js owns UI state; render.js does not read/write saves.
+
+## Flight-mode boundary
+
+Run(seed, cat, {mode}) defaults to classic; relaxed changes generation/travel and starting rescues while retaining core flap physics. App session flightStyle selects mode; Daily and walkthrough override to classic. Store.settle handles relaxedBest separately and returns before progression settlement. Browser leaderboard UI excludes relaxed and the API rejects explicit non-classic mode payloads; this does not make client-submitted mode cryptographically trustworthy. Any future relaxed online board needs a distinct server-owned ticket/board contract.
