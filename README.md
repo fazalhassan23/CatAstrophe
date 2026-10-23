@@ -87,3 +87,5 @@ The characters honor Luna, Coco, and Pepe. Open **Our cats** from the menu, or *
 ## Planned improvements
 
 See [the staged improvement checklist](docs/IMPROVEMENT-CHECKLIST.md). Stage 1 personality animations are implemented and covered by 72 passing tests; visual owner review and physical mobile performance checks remain pending. Stage 2 has not started.
+
+Stage 2 adds the cozy home room and direct cat-selection controls. Locked friends remain in the room; unlock them in Cats to fly with them. All 75 tests pass; browser visual review remains pending because the automation runtime cannot start.

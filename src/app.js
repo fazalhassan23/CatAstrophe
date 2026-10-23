@@ -21,12 +21,21 @@ function friendlyHint(text){const h=flightHelp();return text.replaceAll('Tap the
 function note(p,text){const n=document.createElement('p');n.textContent=text;p.append(n)}
 function menu(){
  mode='menu';run=null;trainer=null;$('#lesson').hidden=true;$('#toast').textContent='';daily='';$('#hud').hidden=true;$('#live-controls').hidden=true;updateCat();
- const p=show('<span class="eyebrow">LET’S HELP YOUR CAT FLY</span><h2>cat-astrophe!</h2><canvas class="menu-cat" width="600" height="260"></canvas><p>Tap to fly. Dodge obstacles. Catch fish!<br>New here? Try a safe practice flight.</p><div class="meta"><span><b>'+save.best+'</b>PERSONAL BEST</span><span><b>'+save.balance+'</b>FISH BANK</span></div>');
+ const p=show('<span class="eyebrow">LET’S HELP YOUR CAT FLY</span><h2>cat-astrophe!</h2><canvas class="home-room" width="600" height="230" role="img" aria-label="Luna, Coco and Pepe together in their cozy room. Choose a flying friend below."></canvas><p>Catch fish. Dodge obstacles. Come home together.</p><div class="meta"><span><b>'+save.best+'</b>PERSONAL BEST</span><span><b>'+save.balance+'</b>FISH BANK</span></div>');
+ const choices=document.createElement('div');choices.className='home-choices';choices.setAttribute('role','group');choices.setAttribute('aria-label','Choose your flying friend');
+ for(const [id,cat]of Object.entries(ROSTER)){
+  const owned=save.unlocked.includes(id),isSelected=selected===id;
+  const choose=button(cat.name+(isSelected?' · flying':owned?' · select':' · '+cat.cost+' fish'),()=>{
+   if(!owned){collection();return}
+   if(store.selectCat(id)){selected=id;menu()}
+  });choose.className='home-choice'+(isSelected?' is-selected':'');choose.setAttribute('aria-pressed',String(isSelected));choose.setAttribute('aria-label',owned?cat.name+(isSelected?', selected for flight':', select for flight'):cat.name+', locked. Unlock for '+cat.cost+' fish in Cats');choices.append(choose);
+ }
+ p.append(choices);
  p.append(button(save.walkthroughComplete?'Let’s play  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
  if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
  const row=document.createElement('div');row.className='menu-row';
  row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));row.append(button('Our cats',ourCats));if(rootBoard())row.append(button('Global top 100',leaderboard));p.append(row);
- const h=flightHelp();const help=document.createElement('div');help.className='menu-help';note(help,h.flap+' to go up. Stop to float down.');note(help,h.dash+' when full. '+h.pause+'.');note(help,'Hearts give another chance · carry up to 2');p.append(help);const dedication=document.createElement('p');dedication.className='menu-dedication';dedication.textContent='For Luna, Coco, and Pepe. Always close to our hearts.';p.append(dedication);
+ const h=flightHelp();const help=document.createElement('details');help.className='menu-help';const helpTitle=document.createElement('summary');helpTitle.textContent='How to play';help.append(helpTitle);note(help,h.flap+' to go up. Stop to float down.');note(help,h.dash+' when full. '+h.pause+'.');note(help,'Hearts give another chance · carry up to 2');p.append(help);const dedication=document.createElement('p');dedication.className='menu-dedication';dedication.textContent='For Luna, Coco, and Pepe. Always close to our hearts.';p.append(dedication);
 }
 function rootBoard(){return globalThis.CatBoard}
 function leaderboard(){mode='leaderboard';const p=show('<span class="eyebrow">THE WORLD’S BIGGEST MENACES</span><h2>Global top 100.</h2>'),scores=document.createElement('div');p.append(button('Classic',()=>CatBoard.list(scores,'classic')),button('Daily',()=>CatBoard.list(scores,'daily')),scores,button('Back',menu));CatBoard.list(scores,'classic')}
@@ -226,6 +235,7 @@ function frame(ms){
  renderer.draw(run,ms/1000,mode==='playing'?dt:0);audio.update?.(dt,run?.world||0,mode==='playing');
  const t=renderer.motion?ms/1000:0,c=$('#portrait').getContext('2d');
  c.clearRect(0,0,360,260);c.save();c.translate(180,140);c.scale(2.3,2.3);CatArt.cat(c,0,Math.sin(t*2)*3,t,run?.cat||selected,'curious',1,0,save.outfit,{motion:renderer.motion,idle:true});c.restore();
+ const room=$('.home-room');if(room)CatArt.home(room.getContext('2d'),t,selected,renderer.motion,save.outfit);
  const mc=$('.menu-cat');if(mc){const m=mc.getContext('2d');m.clearRect(0,0,600,260);m.save();m.translate(300,140);m.scale(2.4,2.4);CatArt.cat(m,0,Math.sin(t*2)*4,t,selected,'curious',1,0,save.outfit,{motion:renderer.motion,idle:true});m.restore()}
  for(const thumb of document.querySelectorAll('.cat-thumb')){const c=thumb.getContext('2d');c.clearRect(0,0,180,140);c.save();c.translate(94,78);c.scale(1.5,1.5);CatArt.cat(c,0,Math.sin(t*2)*2,t,thumb.dataset.cat,'curious',1,0,save.outfit,{motion:renderer.motion,idle:true});c.restore()}
  requestAnimationFrame(frame);

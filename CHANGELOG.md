@@ -118,3 +118,10 @@ No verified release tag/version is assigned here. Historical implementation note
 - Added shared personality motion profiles: Luna preview hops/ear twitches, Coco slow blinks/breathing/tail sway, Pepe alert ears and brief tail flicks. Approved markings and flight physics stay unchanged.
 - Fixed Pepe’s dark tail tip to follow the tail transform. Explicit reduced-motion settings keep decorative cat poses static in all render contexts.
 - Added four rendering/profile regressions; see docs/IMPROVEMENT-CHECKLIST.md for staged scope and outstanding checks.
+
+## Stage 2 follow-up — 2026-10-23 (unreleased)
+
+- Added a cozy procedural home room with all three cats, a window, plant, shelf and rug, sharing approved character artwork/personality profiles.
+- Added accessible cat selection: owned selection persists; locked cats show fish costs and open the collection without purchasing. Selected outfit appears on the chosen cat only.
+- Grouped instructions in an expandable How to play section and added short/landscape layout rules. No simulation or database changes.
+- 75 tests pass and build succeeds; browser startup remains blocked, so visual/responsive review is pending.
