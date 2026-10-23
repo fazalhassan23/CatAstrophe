@@ -60,3 +60,7 @@ For powers, implement collection, spawn schedule, timer/consumption, HUD and art
 ### Saved field or online change
 
 Update defaults, normalization and merge semantics; test old saves and stale tabs. Online changes require coordinated API validation, SQL, UI, tests and operations docs. Board-size changes require both the API SELECT limit and SQL pruning limit. Credentials stay server-only. Practice lessons must use real actions, offer retries and never bank persistent rewards.
+
+## Cozy home scene
+
+CatArt.home draws the decorative room and all three approved cats into .home-room using the existing loop. The canvas is not the input surface: adjacent native buttons expose selection/lock state to keyboard and assistive technology. Owned cat selection goes through Store.selectCat; locked selection opens collection and never buys automatically. The room honors reduced motion and shares the same character pose profiles as other previews. src/app.js owns UI state; render.js does not read/write saves.

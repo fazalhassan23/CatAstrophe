@@ -53,6 +53,24 @@ function cat(c,x,y,t=0,id='biscuit',mood='curious',flap=0,rotation=0,outfit='non
  if(outfit==='crown')path(c,[[-14,-31],[-18,-48],[-6,-41],[2,-53],[10,-41],[22,-49],[19,-30]],'#efc766',ink);
  c.restore();
 }
+// Decorative room scene; all three family cats belong here, including locked flyers.
+function home(c,t,selected='biscuit',motion=true,outfit='none'){
+ if(!motion)t=0;c.clearRect(0,0,600,230);
+ rr(c,0,0,600,230,18,'#f1e6d2');
+ rr(c,38,18,130,114,12,'#fff8e9','#b9c8b5');rr(c,46,26,114,98,8,'#c9e8e1');
+ ellipse(c,127,49,14,14,'#fff4cc');line(c,[[103,27],[103,124]],'#fff8e9',5);line(c,[[46,75],[160,75]],'#fff8e9',5);
+ rr(c,192,36,44,52,4,'#d0ac87');path(c,[[201,70],[214,51],[227,70]],'#fff2d6');ellipse(c,215,75,8,8,'#fff2d6');
+ rr(c,430,90,115,35,8,'#a8bfa8');line(c,[[442,125],[442,169]],'#8b967c',5);line(c,[[533,125],[533,169]],'#8b967c',5);
+ rr(c,474,53,30,37,4,'#c68f70');line(c,[[489,54],[489,24]],'#6c936b',4);ellipse(c,477,35,14,6,'#8ca979');ellipse(c,500,25,14,6,'#9bb486');
+ rr(c,0,169,600,61,0,'#d5b58f');line(c,[[0,169],[600,169]],'#ba9e7c',2);
+ ellipse(c,300,202,239,23,'#e8d5ac');
+ const spots=[{id:'biscuit',x:125},{id:'mochi',x:300},{id:'pounce',x:475}];
+ for(const spot of spots){
+  if(spot.id===selected)ellipse(c,spot.x,205,56,13,'#b4cbb4');
+  c.save();c.translate(spot.x,153);c.scale(1.12,1.12);
+  cat(c,0,0,t,spot.id,'curious',1,0,spot.id===selected?outfit:'none',{motion,idle:true});c.restore();
+ }
+}
 class Renderer{
  constructor(canvas){this.canvas=canvas;this.c=canvas.getContext('2d');this.particles=[];this.debug=false;this.motion=true;this.world=0;this.palette={...palettes[0]}}
  burst(x,y,type){if(!this.motion)return;for(let i=0;i<12;i++)this.particles.push({x,y,vx:(Math.random()-.5)*160,vy:(Math.random()-.6)*170,life:.6,kind:type});this.particles=this.particles.slice(-120)}
@@ -115,5 +133,5 @@ class Renderer{
  }
  }
 }
-root.CatArt={Renderer,cat,fish,rr,palettes,personality};
+root.CatArt={Renderer,cat,fish,rr,palettes,personality,home};
 })(globalThis);
