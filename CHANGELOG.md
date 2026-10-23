@@ -112,3 +112,9 @@ No verified release tag/version is assigned here. Historical implementation note
 
 - Modular fixed-step flying-cat game with procedural art/audio, three cats, six hazards, three worlds, fish/powers, near misses, rescue mechanics and Giant Vacuum encounter.
 - Local progression, missions, achievements, cosmetics, settings, seeded Daily flight, Flight Lab, tests and standalone HTML build.
+
+## Stage 1 follow-up — 2026-10-23 (unreleased)
+
+- Added shared personality motion profiles: Luna preview hops/ear twitches, Coco slow blinks/breathing/tail sway, Pepe alert ears and brief tail flicks. Approved markings and flight physics stay unchanged.
+- Fixed Pepe’s dark tail tip to follow the tail transform. Explicit reduced-motion settings keep decorative cat poses static in all render contexts.
+- Added four rendering/profile regressions; see docs/IMPROVEMENT-CHECKLIST.md for staged scope and outstanding checks.

@@ -83,3 +83,7 @@ The leaderboard rejects basic malformed/implausible submissions but does not rep
 ## Our cats
 
 The characters honor Luna, Coco, and Pepe. Open **Our cats** from the menu, or **Meet [name]** in the cat collection, to see their family photos and stories. Stories are optional and gently introduce loss/missing-pet themes. Photos are in `assets/cats/`, story text in `src/stories.js`, and the build embeds them for offline reading. The gameplay artwork remains the established cartoon style. Internal IDs `biscuit`, `mochi`, and `pounce` remain stable for existing saves and score rows; only display names changed. Do not rename those IDs as a cosmetic edit. Family photos and stories should not be repurposed without the owner’s permission.
+
+## Planned improvements
+
+See [the staged improvement checklist](docs/IMPROVEMENT-CHECKLIST.md). Stage 1 personality animations are implemented and covered by 72 passing tests; visual owner review and physical mobile performance checks remain pending. Stage 2 has not started.
