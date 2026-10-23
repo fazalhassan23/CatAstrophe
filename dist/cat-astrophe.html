@@ -72,6 +72,17 @@ input,select,textarea{font-size:16px}.global-scores input{font-size:16px}button,
 /* Compact progress collections: three badges per page, a separate keepsake view. */
 .milestone-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}.milestone-tabs button[aria-pressed="true"]{background:#e0eadc;border-color:var(--teal);font-weight:700}.milestone-pages{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin-top:10px}.milestone-pages span{font-size:12px}.panel-milestones h2{font-size:27px;margin:8px 0}.panel-milestones .milestone-card{padding:9px;margin:7px 0}.panel-milestones .milestone-card p{margin:4px 0}.panel-milestones>p{font-size:12px}.panel-milestones>.secondary{position:sticky;bottom:0;box-shadow:0 -4px 10px #fffbef;background:#fffaf3}
 @media(orientation:landscape) and (max-height:540px){.panel-milestones h2{font-size:23px}.panel-milestones .milestone-card{padding:7px}}
+
+/* Visual QA: keep home controls visible without shrinking touch targets. */
+@media(min-width:1051px){.layout{margin:16px auto}.stage:has(.panel){height:calc(100dvh - 192px);aspect-ratio:auto}.stage:has(.panel)>#game{position:absolute;inset:0;height:100%}}
+@media(max-width:1050px) and (min-height:721px){.layout{margin-bottom:10px}}
+@media(min-height:651px) and (max-height:950px){.panel-menu .home-room{max-height:70px;margin:4px auto}.panel-menu>.eyebrow{display:none}.panel-menu h2{font-size:27px;margin:4px 0}.panel-menu .meta{margin:5px 0}.panel-menu .home-choices,.panel-menu .flight-styles{margin:4px 0}.panel-menu .play{margin:5px 0}.panel-menu>.menu-dedication:last-child{margin-top:4px;padding-top:4px}}
+@media(max-height:650px) and (orientation:portrait){
+.panel-menu{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2px 6px;padding:8px}.panel-menu>.eyebrow,.panel-menu .home-room,.panel-menu>p:not(.menu-dedication){display:none}.panel-menu h2{grid-column:1;grid-row:1;font-size:23px;margin:0;align-self:center}.panel-menu .meta{grid-column:2;grid-row:1;margin:0;gap:14px;font-size:8px}.panel-menu .meta b{font-size:17px}.panel-menu .home-choices{grid-column:1/-1;grid-row:2;margin:0}.panel-menu .flight-styles{grid-column:1/-1;grid-row:3;margin:0}.panel-menu>.play{grid-column:1;grid-row:4;margin:2px 0;padding:8px;font-size:12px}.panel-menu>.secondary{grid-column:2;grid-row:4;margin:2px 0;padding:6px;font-size:11px}.panel-menu .menu-row{grid-column:1/-1;grid-row:5;margin:0;gap:4px}.panel-menu .menu-help{grid-column:1/-1;grid-row:6;margin:0;padding:0}.panel-menu>.menu-dedication:last-child{display:none}.panel-menu .menu-help summary{padding:8px 0;min-height:36px}
+}
+@media(orientation:landscape) and (max-height:540px){
+.panel-menu{gap:3px 14px;padding:8px}.panel-menu>.eyebrow,.panel-menu .home-room,.panel-menu>p,.panel-menu>.menu-dedication:last-child{display:none}.panel-menu h2{grid-column:1;grid-row:1;margin:0;font-size:24px}.panel-menu .meta{grid-column:2;grid-row:1}.panel-menu .home-choices{grid-column:1;grid-row:2}.panel-menu .flight-styles{grid-column:1;grid-row:3}.panel-menu>.play{grid-column:1;grid-row:4}.panel-menu>.secondary{grid-column:1;grid-row:5}.panel-menu .menu-row{grid-column:2;grid-row:2/span 3}.panel-menu .menu-help{grid-column:2;grid-row:5}.panel-menu .menu-row .secondary{min-height:44px}.panel-menu .menu-help summary{min-height:44px}
+}
 </style></head>
 <body>
 <header class="masthead"><a class="brand" href="#" aria-label="CAT-ASTROPHE home">cat-astrophe<span>!</span></a><span class="edition">A SMALL GAME ABOUT BIG CAT ENERGY</span><button id="sound" class="quiet" aria-label="Toggle sound">Sound on</button></header>
@@ -256,9 +267,9 @@ root.CatTraining={Walkthrough,STEPS};if(typeof module!=='undefined')module.expor
 </script><script>/* Versioned local progression; invalid fields discarded independently. */
 (function(root){
 const {ROSTER}=CatCore,KEY='catastrophe-v1';
-const defaults=()=>({version:1,walkthroughComplete:false,best:0,relaxedBest:0,balance:0,tokens:0,unlocked:['biscuit'],outfits:['none'],selected:'biscuit',outfit:'none',records:{passed:0,seconds:0,combo:0,cleanPassed:0},totals:{fish:0,near:0,worlds:0,escapes:0,dashes:0,runs:0},missions:[],achievements:[],discoveries:[],daily:{},settings:{fx:.45,music:.12,mute:false,motion:true}});
+const defaults=()=>({version:1,walkthroughComplete:false,best:0,relaxedBest:0,balance:0,tokens:0,unlocked:['biscuit'],outfits:['none'],selected:'biscuit',outfit:'none',records:{passed:0,seconds:0,combo:0,cleanPassed:0},totals:{fish:0,near:0,worlds:0,escapes:0,dashes:0,runs:0},missions:[],achievements:[],discoveries:[],daily:{},settings:{fx:.45,music:.12,mute:false,motion:true,motionOverride:false}});
 const num=(n,max=1e9)=>typeof n==='number'&&Number.isFinite(n)?Math.min(max,Math.max(0,n)):0;
-function normalize(v){const d=defaults();if(!v||typeof v!=='object')return d;d.walkthroughComplete=v.walkthroughComplete===true;for(const k of ['best','relaxedBest','balance','tokens'])d[k]=Math.floor(num(v[k]));d.unlocked=[...new Set(['biscuit',...(Array.isArray(v.unlocked)?v.unlocked:[]).filter(k=>ROSTER[k])])];d.outfits=[...new Set(['none',...(Array.isArray(v.outfits)?v.outfits:[]).filter(k=>['goggles','crown'].includes(k))])];if(d.unlocked.includes(v.selected))d.selected=v.selected;if(d.outfits.includes(v.outfit))d.outfit=v.outfit;for(const k of Object.keys(d.totals))d.totals[k]=Math.floor(num(v.totals?.[k]));for(const k of Object.keys(d.records))d.records[k]=Math.floor(num(v.records?.[k]));d.missions=Array.isArray(v.missions)?v.missions.filter(k=>typeof k==='string'):[];d.achievements=Array.isArray(v.achievements)?v.achievements.filter(k=>typeof k==='string'):[];d.discoveries=Array.isArray(v.discoveries)?[...new Set(v.discoveries.filter(k=>['luna-trail','coco-trail','pepe-trail'].includes(k)))]:[];if(v.settings){for(const k of ['fx','music'])if(typeof v.settings[k]==='number')d.settings[k]=num(v.settings[k],1);for(const k of ['mute','motion'])if(typeof v.settings[k]==='boolean')d.settings[k]=v.settings[k]}if(v.daily&&typeof v.daily==='object')for(const [k,n]of Object.entries(v.daily).slice(-30))if(/^\d{4}-\d{2}-\d{2}$/.test(k))d.daily[k]=Math.floor(num(n));return d}
+function normalize(v){const d=defaults();if(!v||typeof v!=='object')return d;d.walkthroughComplete=v.walkthroughComplete===true;for(const k of ['best','relaxedBest','balance','tokens'])d[k]=Math.floor(num(v[k]));d.unlocked=[...new Set(['biscuit',...(Array.isArray(v.unlocked)?v.unlocked:[]).filter(k=>ROSTER[k])])];d.outfits=[...new Set(['none',...(Array.isArray(v.outfits)?v.outfits:[]).filter(k=>['goggles','crown'].includes(k))])];if(d.unlocked.includes(v.selected))d.selected=v.selected;if(d.outfits.includes(v.outfit))d.outfit=v.outfit;for(const k of Object.keys(d.totals))d.totals[k]=Math.floor(num(v.totals?.[k]));for(const k of Object.keys(d.records))d.records[k]=Math.floor(num(v.records?.[k]));d.missions=Array.isArray(v.missions)?v.missions.filter(k=>typeof k==='string'):[];d.achievements=Array.isArray(v.achievements)?v.achievements.filter(k=>typeof k==='string'):[];d.discoveries=Array.isArray(v.discoveries)?[...new Set(v.discoveries.filter(k=>['luna-trail','coco-trail','pepe-trail'].includes(k)))]:[];if(v.settings){for(const k of ['fx','music'])if(typeof v.settings[k]==='number')d.settings[k]=num(v.settings[k],1);for(const k of ['mute','motion','motionOverride'])if(typeof v.settings[k]==='boolean')d.settings[k]=v.settings[k]}if(v.daily&&typeof v.daily==='object')for(const [k,n]of Object.entries(v.daily).slice(-30))if(/^\d{4}-\d{2}-\d{2}$/.test(k))d.daily[k]=Math.floor(num(n));return d}
 const MISSIONS=[{id:'fish',title:'A decent lunch',text:'Collect 15 fish across flights.',goal:15,stat:'fish',reward:10},{id:'near',title:'Living on the edge',text:'Make 3 successful near misses.',goal:3,stat:'near',reward:15},{id:'worlds',title:'Wrong turn at the sky',text:'Discover the Kitchen Dimension.',goal:1,stat:'worlds',reward:15},{id:'escapes',title:'Unbe-weave-able',text:'Escape one yarn tangle.',goal:1,stat:'escapes',reward:8},{id:'dashes',title:'Unscheduled acceleration',text:'Activate Zoomies or Pounce 3 times.',goal:3,stat:'dashes',reward:15}];
 const MILESTONES=[
  {id:'first-flight',title:'First flight!',text:'Finish your first flight.',goal:1,stat:'runs',group:'totals'},
@@ -453,7 +464,7 @@ class Renderer{
   if(g.type==='pigeon'){c.save();c.setLineDash([4,6]);line(c,[[x-80,y+24],[x+150,y+24]],'#7f8f93',1.5);c.restore();ellipse(c,x+34,y+22,27,17,'#8f9ea9','#4f6269');ellipse(c,x+53,y+9,14,12,'#97b4b3','#4f6269');path(c,[[x+65,y+10],[x+77,y+15],[x+65,y+18]],'#dca36a');ellipse(c,x+56,y+6,2,2,'#263e3d');wing(c,x+32,y+21,this.motion?t+g.id*.7+k:0)}
   if(g.type==='vacuum'){rr(c,x,y,w,h,15,'#b48591','#6b5166');rr(c,x+10,y+12,w-20,30,8,'#e8c5b2','#6b5166');for(let j=0;j<3;j++)line(c,[[x+14,y+54+j*8],[x+w-14,y+54+j*8]],'#6b5166',3);if(k===1){c.save();c.globalAlpha=.35;path(c,[[x,y],[x-80,y-90],[x+w+80,y-90],[x+w,y]],'#fff8dd');c.restore();for(let j=0;j<3;j++)line(c,[[x-30+j*38,y-60],[x+10+j*14,y-20]],'#faf1d3',2)}}
   if(g.type==='toast'){if(k===2){rr(c,x,y,w,h,10,'#9da9a5','#647c78');continue}rr(c,x,y,w,h,13,'#b6774e','#775139');rr(c,x+5,y+5,w-10,h-10,10,'#f4d49e');rr(c,x+19,y+23,18,13,4,'#f7e2a2')}
-  if(g.type==='fan'){const cx=x+w/2,cy=y+h/2;ellipse(c,cx,cy,40,40,'#d6ded080','#657e76');c.save();c.translate(cx,cy);c.rotate(t*3);for(let j=0;j<4;j++){c.rotate(Math.PI/2);ellipse(c,0,-19,9,19,'#8eafa1','#657e76')}c.restore();ellipse(c,cx,cy,8,8,'#f2dab0','#657e76');if(k===1)for(let j=0;j<3;j++)line(c,[[cx-20+j*20,cy-67],[cx-15+j*20,cy-100]],'#fff3ca',2)}
+  if(g.type==='fan'){const cx=x+w/2,cy=y+h/2;ellipse(c,cx,cy,40,40,'#d6ded080','#657e76');c.save();c.translate(cx,cy);c.rotate(this.motion?t*3:0);for(let j=0;j<4;j++){c.rotate(Math.PI/2);ellipse(c,0,-19,9,19,'#8eafa1','#657e76')}c.restore();ellipse(c,cx,cy,8,8,'#f2dab0','#657e76');if(k===1)for(let j=0;j<3;j++)line(c,[[cx-20+j*20,cy-67],[cx-15+j*20,cy-100]],'#fff3ca',2)}
   if(g.type==='yarn'){ellipse(c,x+w/2,y+h/2,w/2,h/2,'#b19ac8','#785c92');for(let j=0;j<4;j++)line(c,[[x+8,y+12+j*8],[x+w-8,y+h-12-j*8]],'#e0cde9',2)}
  }
  }
@@ -529,7 +540,7 @@ let photoDialog=null,flightStyle='classic';
 function applySettings(){
  audio.volume=save.settings.mute?0:save.settings.fx;
  audio.music=save.settings.mute?0:save.settings.music;
- renderer.motion=save.settings.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
+ renderer.motion=save.settings.motion&&(save.settings.motionOverride||!matchMedia('(prefers-reduced-motion: reduce)').matches);
  $('#sound').textContent=save.settings.mute?'Sound off':'Sound on';
 }
 function button(text,action,cls='secondary'){const b=document.createElement('button');b.textContent=text;b.className=cls;b.onclick=()=>action();return b}
@@ -646,10 +657,12 @@ function settings(back){
   const input=document.createElement('input');input.type='range';input.min=0;input.max=1;input.step=.05;input.value=save.settings[key];
   input.oninput=()=>{save.settings[key]=+input.value;applySettings();store.write()};l.append(input);p.append(l);
  }
- for(const [key,label]of [['mute','Mute all audio'],['motion','Particles and motion effects']]){
-  const l=document.createElement('label');l.className='setting';const input=document.createElement('input');input.type='checkbox';input.checked=save.settings[key];
-  input.onchange=()=>{save.settings[key]=input.checked;applySettings();store.write()};l.append(input,' '+label);p.append(l);
+ for(const [key,label]of [['mute','Mute all audio'],['motion','Animations (fans, wings and cat movement)']]){
+  const l=document.createElement('label');l.className='setting';const input=document.createElement('input');input.type='checkbox';input.checked=key==='motion'?renderer.motion:save.settings[key];
+  input.onchange=()=>{save.settings[key]=input.checked;if(key==='motion')save.settings.motionOverride=true;applySettings();store.write()};l.append(input,' '+label);p.append(l);
  }
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)note(p,'Your device prefers less motion. Turn Animations on above if you would like fans, wings and cats to move.');
+ p.append(button('Use device motion preference',()=>{save.settings.motion=true;save.settings.motionOverride=false;applySettings();store.write();settings(back)}));
  if(!store.available)note(p,'Browser storage is unavailable. Progress lasts for this session.');
  p.append(button('Back',back));if(params.has('dev'))p.append(button('Flight lab',lab));
 }

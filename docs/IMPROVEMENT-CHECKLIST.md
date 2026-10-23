@@ -55,3 +55,9 @@ Browser review could not run: the browser automation launcher failed while enume
 - [x] Three badges per page; separate Keepsakes view and persistent Back action.
 - [x] Actual application navigation regression; full suite 98 pass and build succeeds.
 - [ ] Browser/device visual review remains blocked at launcher startup.
+
+### Live review after drive unlock
+- [x] Browser startup restored; phone badge layout and Next verified live.
+- [x] Home overflow measured across six viewport sizes; responsive CSS fix applied; 98 tests/build pass.
+- [ ] Post-fix screenshot/viewport verification: browser transport disconnected.
+- [ ] Remaining screens, gameplay feel and physical-device checks.
