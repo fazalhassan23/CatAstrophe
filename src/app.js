@@ -103,14 +103,22 @@ function missions(){
  if(save.achievements.length)note(p,save.achievements.map(a=>CatSave.MILESTONES.find(m=>m.id===a)?.title||a.replaceAll('-',' ')).join(' · '));
  note(p,'Daily best: '+(save.daily[CatSave.dailyKey()]||0));p.append(button('Back',menu));
 }
-function milestones(){
+function milestones(section='badges',page=0){
  mode='milestones';const p=show('<span class="eyebrow">YOUR LITTLE VICTORIES</span><h2>Look how far<br>you’ve flown.</h2>');
- note(p,'Classic and Daily flights count. Badges celebrate your progress; no extra fish are awarded.');
- for(const m of CatSave.MILESTONES){const earned=save.achievements.includes(m.id),value=CatSave.milestoneProgress(save,m),card=document.createElement('div');card.className='milestone-card'+(earned?' earned':'');
+ const tabs=document.createElement('div');tabs.className='milestone-tabs';tabs.setAttribute('role','group');tabs.setAttribute('aria-label','Progress collection');
+ for(const [id,label] of [['badges','Badges'],['discoveries','Keepsakes']]){const b=button(label,()=>milestones(id));b.setAttribute('aria-pressed',String(section===id));tabs.append(b)}p.append(tabs);
+ if(section==='badges'){
+ note(p,'Classic and Daily flights count. Each badge celebrates a little victory.');
+ for(const m of CatSave.MILESTONES.slice(page*3,page*3+3)){const earned=save.achievements.includes(m.id),value=CatSave.milestoneProgress(save,m),card=document.createElement('div');card.className='milestone-card'+(earned?' earned':'');
  const title=document.createElement('b');title.textContent=(earned?'✓ ':'')+m.title;card.append(title);note(card,m.text);
  const status=document.createElement('span');status.textContent=earned?'Badge earned':value+' / '+m.goal;card.append(status);
  const progress=document.createElement('progress');progress.max=m.goal;progress.value=value;progress.setAttribute('aria-label',m.title+' progress');card.append(progress);p.append(card)}
- if(globalThis.CatDiscovery){const title=document.createElement('h3');title.textContent='Relaxed discoveries';p.append(title);note(p,'Optional star trails save keepsakes, not points. Fly with each cat to find theirs.');for(const memory of Object.values(CatDiscovery.MEMORIES)){const card=document.createElement('div');card.className='milestone-card';note(card,(save.discoveries.includes(memory.id)?'✓ Found: ':'Not found yet: ')+memory.title);p.append(card)}}
+ const pages=Math.ceil(CatSave.MILESTONES.length/3),nav=document.createElement('div');nav.className='milestone-pages';
+ const previous=button('Previous',()=>milestones('badges',page-1));previous.disabled=page===0;nav.append(previous);
+ const status=document.createElement('span');status.textContent=(page+1)+' / '+pages;status.setAttribute('aria-label','Badge page '+(page+1)+' of '+pages);nav.append(status);
+ const next=button('Next',()=>milestones('badges',page+1));next.disabled=page===pages-1;nav.append(next);p.append(nav);
+ }
+ if(section==='discoveries'&&globalThis.CatDiscovery){const title=document.createElement('h3');title.textContent='Relaxed discoveries';p.append(title);note(p,'Optional star trails save keepsakes, not points. Fly with each cat to find theirs.');for(const memory of Object.values(CatDiscovery.MEMORIES)){const card=document.createElement('div');card.className='milestone-card';note(card,(save.discoveries.includes(memory.id)?'✓ Found: ':'Not found yet: ')+memory.title);p.append(card)}}
  p.append(button('Back',menu));
 }
 function settings(back){

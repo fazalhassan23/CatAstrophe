@@ -50,3 +50,8 @@ Browser review could not run: the browser automation launcher failed while enume
 
 ### Stage 5 verification — 2026-10-23
 97 tests pass and build succeeds. Course/RNG parity, optional point-free collectibles, persistence, mode exclusions and decorative rendering regressions pass. This completes implementation of stages 1–5. Visual/device/owner reviews above remain open because browser startup is unavailable; automated checks do not replace those reviews. User explicitly authorized continuing through Stage 5 while away. No further stage started.
+
+### Compact collection follow-up — 2026-10-23
+- [x] Three badges per page; separate Keepsakes view and persistent Back action.
+- [x] Actual application navigation regression; full suite 98 pass and build succeeds.
+- [ ] Browser/device visual review remains blocked at launcher startup.
