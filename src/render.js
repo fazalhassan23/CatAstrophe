@@ -11,30 +11,44 @@ function wing(c,x,y,t,color='#7995a1'){
  path(c,[[-8,2],[-15,-5+lift],[0,-9+lift],[12,2]],color,'#4f6269');
  line(c,[[-8,-2],[-4,-4+lift],[2,-3+lift]],'#b7c8c8',1.5);c.restore();
 }
-function cat(c,x,y,t=0,id='biscuit',mood='curious',flap=0,rotation=0,outfit='none'){
+// Pure decorative poses. No random state or simulation changes.
+function personality(id,t=0,motion=true,idle=true){
+ if(!motion)return{hop:0,breath:1,ear:0,tail:0,paw:0,blink:0};
+ const pulse=(period,start,length)=>{const phase=((t%period)+period)%period;return phase>=start&&phase<=start+length?Math.sin((phase-start)/length*Math.PI):0};
+ const coco=id==='mochi',pepe=id==='pounce';
+ return{hop:idle&&!coco&&!pepe?-3*pulse(5.5,2.8,.65):0,
+ breath:1+Math.sin(t*(coco?1.6:2.2))*(coco?.012:.006),
+ ear:coco?Math.sin(t*1.8)*.7:pepe?pulse(6,3,.55)*2:pulse(4.5,1.8,.5)*2.5,
+ tail:coco?Math.sin(t*1.5)*.08:pepe?Math.sin(t*14)*pulse(5.8,2.6,.7)*.2:Math.sin(t*3)*.12,
+ paw:Math.sin(t*(coco?2:pepe?4:5))*(coco?1:2),
+ blink:pulse(coco?6.8:pepe?7.5:5.8,coco?3:2.2,coco?1.1:.22)};
+}
+function cat(c,x,y,t=0,id='biscuit',mood='curious',flap=0,rotation=0,outfit='none',options={}){
  const ink='#493e3a',coco=id==='mochi',pepe=id==='pounce',luna=!coco&&!pepe,coat=coco?'#777982':pepe?'#b9a080':'#e7a45b',light='#fff9ef';
- c.save();c.translate(x,y);c.rotate(rotation);if(luna)c.scale(.94,.94);const bounce=Math.max(0,1-flap*5);c.scale(1+bounce*.1,1-bounce*.07);
+ const motion=options.motion!==false,pose=personality(id,t,motion,options.idle!==false);if(!motion)t=0;
+ c.save();c.translate(x,y+pose.hop);c.rotate(rotation);c.scale(1,pose.breath);if(luna)c.scale(.94,.94);const bounce=Math.max(0,1-flap*5);c.scale(1+bounce*.1,1-bounce*.07);
  // A separate articulated tail, four paws, ears, head, eyes and costume.
- c.save();c.rotate(Math.sin(t*5)*.15);line(c,[[-18,7],[-38,8],[-48,-1],[-45,-13]],ink,id==='mochi'?17:13);line(c,[[-18,7],[-38,8],[-48,-1],[-45,-13]],coat,id==='mochi'?12:8);c.restore();
- if(pepe){line(c,[[-48,-1],[-45,-13]],ink,8)}
- const paw=Math.sin(t*10+flap*14)*9;
+ c.save();c.rotate(pose.tail);line(c,[[-18,7],[-38,8],[-48,-1],[-45,-13]],ink,id==='mochi'?17:13);line(c,[[-18,7],[-38,8],[-48,-1],[-45,-13]],coat,id==='mochi'?12:8);if(pepe){line(c,[[-48,-1],[-45,-13]],ink,8)}c.restore();
+ const paw=motion?Math.sin(t*10+flap*14)*6+pose.paw:0;
  ellipse(c,-14,23+paw,8,12,light,ink);ellipse(c,14,23-paw,8,12,light,ink);
  ellipse(c,-2,5,id==='mochi'?32:27,id==='mochi'?28:24,coat,ink);ellipse(c,4,12,coco?23:18,coco?22:17,light);
  if(coco){for(let i=0;i<8;i++){const a=i*Math.PI/4;ellipse(c,Math.cos(a)*26,Math.sin(a)*22+4,8,8,a>0&&a<Math.PI?light:coat)}ellipse(c,4,14,22,18,light)}
- const earTop=coco?-34:pepe?-48:-43;path(c,[[-21,-12],[-25,earTop],[-5,-26]],coat,ink);path(c,[[8,-26],[28,earTop+2],[26,-7]],coat,ink);
- path(c,[[-19,-22],[-22,earTop+8],[-11,-26]],'#e4b1ae');path(c,[[15,-25],[24,earTop+9],[23,-20]],'#e4b1ae');
+ const earTop=coco?-34:pepe?-48:-43;path(c,[[-21,-12],[-25-pose.ear,earTop],[-5,-26]],coat,ink);path(c,[[8,-26],[28+pose.ear,earTop+2],[26,-7]],coat,ink);
+ path(c,[[-19,-22],[-22-pose.ear,earTop+8],[-11,-26]],'#e4b1ae');path(c,[[15,-25],[24+pose.ear,earTop+9],[23,-20]],'#e4b1ae');
  ellipse(c,4,-10,29,24,coat,ink);if(coco){ellipse(c,-20,-2,9,11,coat);ellipse(c,28,-2,9,11,coat)}
  // White facial blaze, muzzle and chest follow the family photographs.
  path(c,[[3,-33],[9,-33],[11,-20],[17,-5],[23,7],[8,13],[-9,7],[-6,-4],[1,-19]],light);ellipse(c,7,2,20,12,light);
  if(id==='biscuit'){line(c,[[-6,-32],[-3,-23]],'#b87549',3);line(c,[[4,-33],[6,-24]],'#b87549',3);line(c,[[15,-30],[14,-22]],'#b87549',3)}
  if(pepe){line(c,[[-13,-24],[-6,-21]],'#78664e',2.5);line(c,[[17,-22],[23,-25]],'#78664e',2.5)}
+ c.save();c.translate(0,-10);c.scale(1,1-pose.blink*.93);c.translate(0,10);
  const sleepy=mood==='sleepy',happy=mood==='excited'||mood==='proud';
  if(sleepy||happy){line(c,[[-9,-9],[-4,happy?-13:-7],[1,-9]],ink,2.5);line(c,[[13,-9],[18,happy?-13:-7],[23,-9]],ink,2.5)}
  else{const iris=coco?'#d4aa4b':pepe?'#9baf70':'#9baf9b';ellipse(c,-4,-10,6,7,iris,ink);ellipse(c,18,-10,6,7,iris,ink);ellipse(c,-4,-10,mood==='spooked'?5:3.8,mood==='spooked'?7:5.5,ink);ellipse(c,18,-10,mood==='spooked'?5:3.8,mood==='spooked'?7:5.5,ink);ellipse(c,-3,-12,1.3,1.7,'#fff');ellipse(c,19,-12,1.3,1.7,'#fff')}
+ c.restore();
  path(c,[[4,-2],[11,-2],[7,2]],coco?'#a6767e':'#de9b9d');line(c,[[7,3],[7,5],[3,7]],ink,1.7);line(c,[[7,5],[11,7]],ink,1.7);
  for(let s of [-1,1])for(let j=0;j<2;j++)line(c,[[7+s*16,1+j*4],[7+s*32,-1+j*8]],ink,1.5);
  // White forepaws remain visible at the sides without changing the flight hitbox.
- ellipse(c,-20,17,6,8,light,ink);ellipse(c,25,17,6,8,light,ink);
+ ellipse(c,-20,17+pose.paw,6,8,light,ink);ellipse(c,25,17-pose.paw,6,8,light,ink);
  if(outfit==='goggles'){rr(c,-15,-20,17,15,5,'#adcfcc',ink);rr(c,11,-20,17,15,5,'#adcfcc',ink);line(c,[[2,-13],[11,-13]],ink,3)}
  if(outfit==='crown')path(c,[[-14,-31],[-18,-48],[-6,-41],[2,-53],[10,-41],[22,-49],[19,-30]],'#efc766',ink);
  c.restore();
@@ -59,7 +73,7 @@ class Renderer{
   if(run?.armor>0){c.save();c.translate(C.x,y);c.rotate(Math.sin(t*5)*.09);rr(c,-33,-23,66,47,6,'#c99865','#75553f');line(c,[[-32,-20],[-45,-30],[-17,-31]],'#75553f',3);c.restore()}
   // Reduced motion uses a steady protection ring and never hides the character.
   if(!this.motion&&run?.invuln>0){c.save();c.strokeStyle='#527f75';c.lineWidth=2.5;c.beginPath();c.arc(C.x,y,43,0,Math.PI*2);c.stroke();c.restore()}
-  if(!this.motion||!run||run.invuln<=0||Math.sin(t*30)>0)cat(c,C.x,y,t,run?.cat||'biscuit',run?.mood||'curious',run?.flapAge||1,run?.tangle>0?Math.sin(t*8)*.45:clamp((run?.vy||0)/900,-.3,.55),run?.outfit||'none');
+  if(!this.motion||!run||run.invuln<=0||Math.sin(t*30)>0)cat(c,C.x,y,t,run?.cat||'biscuit',run?.mood||'curious',run?.flapAge||1,run?.tangle>0?Math.sin(t*8)*.45:clamp((run?.vy||0)/900,-.3,.55),run?.outfit||'none',{motion:this.motion,idle:!run});
   if(run?.tangle>0){ellipse(c,C.x,y+12,29,19,'#bda1d080','#825e9e');for(let i=0;i<4;i++)line(c,[[C.x-26,y-8+i*8],[C.x+27,y+15-i*4]],'#825e9e',2)}
   if(run?.nip>0){for(let i=0;i<5;i++){const a=t*4+i*1.25;ellipse(c,C.x+Math.cos(a)*40,y+Math.sin(a)*32,2.5,2.5,'#fff3ac')}}
   if(run?.magnet>0){c.save();c.setLineDash([3,8]);c.strokeStyle='#fcf0c199';c.lineWidth=1.5;c.beginPath();c.arc(C.x,y,55+Math.sin(t*4)*5,0,7);c.stroke();c.restore()}
@@ -101,5 +115,5 @@ class Renderer{
  }
  }
 }
-root.CatArt={Renderer,cat,fish,rr,palettes};
+root.CatArt={Renderer,cat,fish,rr,palettes,personality};
 })(globalThis);

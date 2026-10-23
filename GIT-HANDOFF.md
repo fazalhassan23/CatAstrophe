@@ -155,3 +155,9 @@ The previous top-100 database retention update was already applied live. This do
 ## 7. Keeping this handoff current
 
 For each future batch, update the date, status, what/why, affected files, checks, deployment impact and unresolved limitations. Keep CHANGELOG.md concise and versioned; use this file for implementation/release context. Mark completed commits/deployments only after verifying them, and never store credentials or speculative claims here.
+
+## Stage 1 personality update — 2026-10-23
+
+Changed src/render.js and render call sites in src/app.js to share per-cat decorative profiles. Luna hops only in previews, Coco slow-blinks, and Pepe flicks his tail/ears. Flight physics, artwork colors/markings and IDs are preserved. Fixed tail-tip transform cohesion. Added tests/personality.cjs for static reduced motion, preview-only hops, blink timing, bounded values and canvas state. No DB migration or dependency changes. Checklist: docs/IMPROVEMENT-CHECKLIST.md. Stage 2 has not started. Physical mobile performance remains unverified.
+
+Validation result: 72/72 tests pass and standalone build succeeds. Browser visual review was blocked by the automation launcher failing on an unrelated locked BitLocker D: drive; do not report the UI/physical-device performance as verified. Preview uses the running local server once refreshed; deploying requires the usual Git/Vercel workflow.

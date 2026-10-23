@@ -225,9 +225,9 @@ function frame(ms){
  toastTime=Math.max(0,toastTime-dt);$('#toast').classList.toggle('show',toastTime>0&&mode==='playing'&&!run?.tutorial);
  renderer.draw(run,ms/1000,mode==='playing'?dt:0);audio.update?.(dt,run?.world||0,mode==='playing');
  const t=renderer.motion?ms/1000:0,c=$('#portrait').getContext('2d');
- c.clearRect(0,0,360,260);c.save();c.translate(180,140);c.scale(2.3,2.3);CatArt.cat(c,0,Math.sin(t*2)*3,t,run?.cat||selected,'curious',1,0,save.outfit);c.restore();
- const mc=$('.menu-cat');if(mc){const m=mc.getContext('2d');m.clearRect(0,0,600,260);m.save();m.translate(300,140);m.scale(2.4,2.4);CatArt.cat(m,0,Math.sin(t*2)*4,t,selected,'curious',1,0,save.outfit);m.restore()}
- for(const thumb of document.querySelectorAll('.cat-thumb')){const c=thumb.getContext('2d');c.clearRect(0,0,180,140);c.save();c.translate(94,78);c.scale(1.5,1.5);CatArt.cat(c,0,Math.sin(t*2)*2,t,thumb.dataset.cat);c.restore()}
+ c.clearRect(0,0,360,260);c.save();c.translate(180,140);c.scale(2.3,2.3);CatArt.cat(c,0,Math.sin(t*2)*3,t,run?.cat||selected,'curious',1,0,save.outfit,{motion:renderer.motion,idle:true});c.restore();
+ const mc=$('.menu-cat');if(mc){const m=mc.getContext('2d');m.clearRect(0,0,600,260);m.save();m.translate(300,140);m.scale(2.4,2.4);CatArt.cat(m,0,Math.sin(t*2)*4,t,selected,'curious',1,0,save.outfit,{motion:renderer.motion,idle:true});m.restore()}
+ for(const thumb of document.querySelectorAll('.cat-thumb')){const c=thumb.getContext('2d');c.clearRect(0,0,180,140);c.save();c.translate(94,78);c.scale(1.5,1.5);CatArt.cat(c,0,Math.sin(t*2)*2,t,thumb.dataset.cat,'curious',1,0,save.outfit,{motion:renderer.motion,idle:true});c.restore()}
  requestAnimationFrame(frame);
 }
 applySettings();updateCat();menu();requestAnimationFrame(frame);
