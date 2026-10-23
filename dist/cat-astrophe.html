@@ -66,6 +66,8 @@ input,select,textarea{font-size:16px}.global-scores input{font-size:16px}button,
 @media(orientation:landscape) and (max-height:540px){.panel-menu .home-room{grid-column:1;grid-row:2/span 2;max-height:90px;margin:0}.panel-menu>p:not(.menu-dedication){grid-column:2;grid-row:2}.panel-menu .home-choices{grid-column:1;grid-row:4;margin:0}.panel-menu .meta{grid-column:2;grid-row:3}.panel-menu>.play{grid-column:1;grid-row:5}.panel-menu>.secondary{grid-column:1;grid-row:6}.panel-menu .menu-row{grid-column:2;grid-row:4/span 3}.panel-menu .menu-help{grid-column:1;grid-row:7}.panel-menu>.menu-dedication:last-child{grid-column:2;grid-row:7}.home-choice{font-size:10px}}
 
 .flight-styles{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:7px 0}.flight-style{min-height:44px;border:1px solid #ccd3c4;border-radius:8px;background:#fffaf0;color:var(--ink);font-size:12px;padding:8px}.flight-style.is-selected{background:#e0eadc;border-color:var(--teal);font-weight:700}.panel-menu .flight-styles+p{font-size:11px;line-height:1.4}@media(orientation:landscape) and (max-height:540px){.panel-menu .flight-styles{grid-column:1;grid-row:5}.panel-menu>.play{grid-row:6}.panel-menu>.secondary{grid-row:7}.panel-menu .flight-styles+p{grid-column:1/-1;grid-row:8}.panel-menu .menu-help{grid-row:9}.panel-menu>.menu-dedication:last-child{grid-row:9}.panel-menu .menu-row{grid-row:4/span 4}}
+
+.milestone-card{text-align:left;border:1px solid #d8ddcd;border-radius:10px;padding:12px;margin:9px 0;background:#faf8ee}.milestone-card b{font-size:14px}.milestone-card p{font-size:12px;margin:6px 0}.milestone-card span{font-size:11px;color:#52665c}.milestone-card progress{display:block;width:100%;height:8px;margin-top:8px;accent-color:var(--teal)}.milestone-card.earned{background:#e7eee0;border-color:#9cb69b}.milestone-banner{font-size:12px;line-height:1.5;padding:9px 10px;border:1px solid #aec5a5;border-radius:8px;background:#e7eee0;color:var(--teal);margin:8px 0;font-weight:700}.panel-milestones>.secondary{width:100%;margin:12px 0 0}
 </style></head>
 <body>
 <header class="masthead"><a class="brand" href="#" aria-label="CAT-ASTROPHE home">cat-astrophe<span>!</span></a><span class="edition">A SMALL GAME ABOUT BIG CAT ENERGY</span><button id="sound" class="quiet" aria-label="Toggle sound">Sound on</button></header>
@@ -92,7 +94,7 @@ const TYPES=['laundry','pigeon','vacuum','toast','fan','yarn'];
 const ROSTER={biscuit:{name:'Luna',title:'THE LITTLE SPARK',description:'A tiny girl who found warmth, love, and her playful spirit.',trait:'Steady flight. A playful little spark.',gravity:1,flap:1,speed:1,cost:0},mochi:{name:'Coco',title:'THE GENTLE SOUL',description:'Happiest in your lap, always close by. A gentle boy, dearly remembered.',trait:'18% lighter gravity, softer flaps, 7% slower flight.',gravity:.82,flap:.9,speed:.93,cost:20},pounce:{name:'Pepe',title:'THE LITTLE LION',description:'King of the house, with a soft spot for his human mom.',trait:'Sharper flaps, heavier fall. Precision Air Pounce ability.',gravity:1.08,flap:1.06,speed:1,cost:45}};
 function rectDistance(x,y,r){return Math.hypot(x-clamp(x,r.x,r.x+r.w),y-clamp(y,r.y,r.y+r.h))}
 class Run{
- constructor(seed=1,cat='biscuit',options={}){this.mode=options.mode==='relaxed'?'relaxed':'classic';this.seed=seed;this.rand=random(seed);this.rewardRand=random((seed^0x9e3779b9)>>>0);this.cat=ROSTER[cat]?cat:'biscuit';this.trait=ROSTER[this.cat];this.state='playing';this.time=0;this.distance=0;this.score=0;this.fish=0;this.passed=0;this.y=350;this.vy=0;this.flapAge=1;this.gates=[];this.items=[];this.events=[];this.next=this.mode==='relaxed'?260:220;this.center=350;this.id=0;this.death='';this.world=0;this.near=0;this.combo=0;this.bestCombo=0;this.comboTimer=0;this.slow=0;this.armor=0;this.tangle=0;this.taps=0;this.invuln=0;this.mood='curious';this.moodTime=0;this.stats={pass:0,fish:0,near:0,world:0};this.escapes=0;this.blocks=0;this.nip=0;this.magnet=0;this.dash=0;this.charge=0;this.cooldown=0;this.rescues=this.mode==='relaxed'?2:0;this.usedRescues=0;this.tokens=0;this.dashes=0;this.flaps=0;this.mischief=root.CatMischief?new root.CatMischief.System(this):null;}
+ constructor(seed=1,cat='biscuit',options={}){this.mode=options.mode==='relaxed'?'relaxed':'classic';this.seed=seed;this.rand=random(seed);this.rewardRand=random((seed^0x9e3779b9)>>>0);this.cat=ROSTER[cat]?cat:'biscuit';this.trait=ROSTER[this.cat];this.state='playing';this.time=0;this.distance=0;this.score=0;this.fish=0;this.passed=0;this.y=350;this.vy=0;this.flapAge=1;this.gates=[];this.items=[];this.events=[];this.next=this.mode==='relaxed'?260:220;this.center=350;this.id=0;this.death='';this.world=0;this.near=0;this.combo=0;this.bestCombo=0;this.comboTimer=0;this.slow=0;this.armor=0;this.tangle=0;this.taps=0;this.invuln=0;this.mood='curious';this.moodTime=0;this.stats={pass:0,fish:0,near:0,world:0};this.escapes=0;this.blocks=0;this.nip=0;this.magnet=0;this.dash=0;this.charge=0;this.cooldown=0;this.rescues=this.mode==='relaxed'?2:0;this.usedRescues=0;this.tokens=0;this.dashes=0;this.flaps=0;this.discoveries=root.CatDiscovery?new root.CatDiscovery.System(this):null;this.mischief=root.CatMischief?new root.CatMischief.System(this):null;}
  emit(type,data={}){this.events.push({type,...data})}
  drain(){const e=this.events;this.events=[];return e}
  flap(){if(this.state!=='playing')return;if(this.tangle>0){this.taps++;if(this.taps>=3)this.escape();return}this.flaps++;this.vy=C.impulse*this.trait.flap*(this.armor>0?.93:1);this.flapAge=0;this.emit('flap')}
@@ -118,7 +120,7 @@ class Run{
   for(let j=0;j<3;j++)this.items.push({x:g.x+15+j*34,y:g.center+Math.sin(j)*22,kind:j===1&&g.id%4===3?'gold':'fish',taken:false});
   if(g.id%2===1)this.items.push({x:g.x-60,y:g.center,kind:['box','magnet','nip','yarn','mystery','life'][Math.floor(g.id/2)%6],taken:false});
   this.mischief?.spawn(g);
-  this.emit('warning',{text:({laundry:'Laundry day. Mind the socks!',pigeon:'Pigeon patrol. Watch the dotted path.',vacuum:'Vacuum ahead. Stay out of the suction.',toast:'Toast incoming. Follow the crumbs.',fan:'Fan ahead. Ride the visible breeze.',yarn:'Yarn trap. Tangled? Tap three times to escape.'})[type]});
+  this.emit('warning',{text:({laundry:'Laundry day. Mind the socks!',pigeon:'Pigeon patrol. Watch the dotted path.',vacuum:'Vacuum ahead. Stay out of the suction.',toast:'Toast incoming. Follow the crumbs.',fan:'Fan ahead. Ride the visible breeze.',yarn:'Yarn trap. Tangled? Tap three times to escape.'})[type]});this.discoveries?.spawn(g);
  }
  shapes(g){
   const top=g.center-g.gap/2,bottom=g.center+g.gap/2,x=g.x;
@@ -156,7 +158,7 @@ class Run{
    }
   }
   for(const f of this.items){f.x-=dx;const d=Math.hypot(f.x-C.x,f.y-this.y);if(this.magnet>0&&['fish','gold','mystery'].includes(f.kind)&&d<155&&d>1){const pull=Math.min(1,dt*6);f.x+=(C.x-f.x)*pull;f.y+=(this.y-f.y)*pull}if(d<C.r+12)this.collect(f)}
-  this.mischief?.step(dt,dx);if(this.state!=='playing')return;
+  this.mischief?.step(dt,dx);this.discoveries?.step(dt,dx);if(this.state!=='playing')return;
   if(this.y<C.r+45||this.y>C.floor-C.r){const reason=this.y<C.r+45?'ceiling':'ground';if(this.invuln>0){this.y=clamp(this.y,C.r+45,C.floor-C.r);this.vy=reason==='ceiling'?100:-130}else if(!this.rescue())this.end(reason)}
   this.gates=this.gates.filter(g=>g.x>-160);this.items=this.items.filter(f=>f.x>-30&&!f.taken);
  }
@@ -197,6 +199,26 @@ class System{
 }
 root.CatMischief={System,TARGETS};if(typeof module!=='undefined')module.exports=root.CatMischief;
 })(globalThis);
+</script><script>/* Optional Relaxed trails: no damage, currency, charge, score or course RNG. */
+(function(root){
+const {C}=CatCore;
+const MEMORIES={biscuit:{id:'luna-trail',title:'Luna’s butterfly trail',text:'A playful little detour for Luna.'},mochi:{id:'coco-trail',title:'Coco’s cloud trail',text:'A gentle path through the clouds.'},pounce:{id:'pepe-trail',title:'Pepe’s cozy hideaway',text:'A little adventure, with home never far away.'}};
+class System{
+ constructor(run){this.run=run;this.trails=[];this.found=[]}
+ spawn(g){const r=this.run;if(r.mode!=='relaxed'||r.tutorial||r.lab||r.encounter>0||g.id<3||g.id%4!==3)return;
+ const side=g.id%8===3?-1:1;
+ this.trails.push({id:g.id,points:[0,1,2].map(i=>({x:g.x-145+i*38,y:g.center+side*(i===1?40:20),taken:false})),done:false});
+ r.emit('discovery-hint',{text:'Optional star trail! Catch all 3 stars, or keep flying.'});
+ }
+ step(dt,dx){const r=this.run;if(r.state!=='playing')return;
+ for(const trail of this.trails){for(const point of trail.points){point.x-=dx;if(!point.taken&&Math.hypot(point.x-C.x,point.y-r.y)<C.r+10)point.taken=true}
+ if(!trail.done&&trail.points.every(p=>p.taken)){trail.done=true;const memory=MEMORIES[r.cat];if(!this.found.includes(memory.id)){this.found.push(memory.id);r.emit('discovery',{text:'Discovery found: '+memory.title+' · a keepsake, no points'})}}
+ }
+ this.trails=this.trails.filter(t=>t.points.at(-1).x>-30&&!t.done);
+ }
+}
+root.CatDiscovery={System,MEMORIES};if(typeof module!=='undefined')module.exports=root.CatDiscovery;
+})(globalThis);
 </script><script>/* Short, event-driven walkthrough using real flight and pounce mechanics. */
 (function(root){
 'use strict';
@@ -230,10 +252,21 @@ root.CatTraining={Walkthrough,STEPS};if(typeof module!=='undefined')module.expor
 </script><script>/* Versioned local progression; invalid fields discarded independently. */
 (function(root){
 const {ROSTER}=CatCore,KEY='catastrophe-v1';
-const defaults=()=>({version:1,walkthroughComplete:false,best:0,relaxedBest:0,balance:0,tokens:0,unlocked:['biscuit'],outfits:['none'],selected:'biscuit',outfit:'none',totals:{fish:0,near:0,worlds:0,escapes:0,dashes:0,runs:0},missions:[],achievements:[],daily:{},settings:{fx:.45,music:.12,mute:false,motion:true}});
+const defaults=()=>({version:1,walkthroughComplete:false,best:0,relaxedBest:0,balance:0,tokens:0,unlocked:['biscuit'],outfits:['none'],selected:'biscuit',outfit:'none',records:{passed:0,seconds:0,combo:0,cleanPassed:0},totals:{fish:0,near:0,worlds:0,escapes:0,dashes:0,runs:0},missions:[],achievements:[],discoveries:[],daily:{},settings:{fx:.45,music:.12,mute:false,motion:true}});
 const num=(n,max=1e9)=>typeof n==='number'&&Number.isFinite(n)?Math.min(max,Math.max(0,n)):0;
-function normalize(v){const d=defaults();if(!v||typeof v!=='object')return d;d.walkthroughComplete=v.walkthroughComplete===true;for(const k of ['best','relaxedBest','balance','tokens'])d[k]=Math.floor(num(v[k]));d.unlocked=[...new Set(['biscuit',...(Array.isArray(v.unlocked)?v.unlocked:[]).filter(k=>ROSTER[k])])];d.outfits=[...new Set(['none',...(Array.isArray(v.outfits)?v.outfits:[]).filter(k=>['goggles','crown'].includes(k))])];if(d.unlocked.includes(v.selected))d.selected=v.selected;if(d.outfits.includes(v.outfit))d.outfit=v.outfit;for(const k of Object.keys(d.totals))d.totals[k]=Math.floor(num(v.totals?.[k]));d.missions=Array.isArray(v.missions)?v.missions.filter(k=>typeof k==='string'):[];d.achievements=Array.isArray(v.achievements)?v.achievements.filter(k=>typeof k==='string'):[];if(v.settings){for(const k of ['fx','music'])if(typeof v.settings[k]==='number')d.settings[k]=num(v.settings[k],1);for(const k of ['mute','motion'])if(typeof v.settings[k]==='boolean')d.settings[k]=v.settings[k]}if(v.daily&&typeof v.daily==='object')for(const [k,n]of Object.entries(v.daily).slice(-30))if(/^\d{4}-\d{2}-\d{2}$/.test(k))d.daily[k]=Math.floor(num(n));return d}
+function normalize(v){const d=defaults();if(!v||typeof v!=='object')return d;d.walkthroughComplete=v.walkthroughComplete===true;for(const k of ['best','relaxedBest','balance','tokens'])d[k]=Math.floor(num(v[k]));d.unlocked=[...new Set(['biscuit',...(Array.isArray(v.unlocked)?v.unlocked:[]).filter(k=>ROSTER[k])])];d.outfits=[...new Set(['none',...(Array.isArray(v.outfits)?v.outfits:[]).filter(k=>['goggles','crown'].includes(k))])];if(d.unlocked.includes(v.selected))d.selected=v.selected;if(d.outfits.includes(v.outfit))d.outfit=v.outfit;for(const k of Object.keys(d.totals))d.totals[k]=Math.floor(num(v.totals?.[k]));for(const k of Object.keys(d.records))d.records[k]=Math.floor(num(v.records?.[k]));d.missions=Array.isArray(v.missions)?v.missions.filter(k=>typeof k==='string'):[];d.achievements=Array.isArray(v.achievements)?v.achievements.filter(k=>typeof k==='string'):[];d.discoveries=Array.isArray(v.discoveries)?[...new Set(v.discoveries.filter(k=>['luna-trail','coco-trail','pepe-trail'].includes(k)))]:[];if(v.settings){for(const k of ['fx','music'])if(typeof v.settings[k]==='number')d.settings[k]=num(v.settings[k],1);for(const k of ['mute','motion'])if(typeof v.settings[k]==='boolean')d.settings[k]=v.settings[k]}if(v.daily&&typeof v.daily==='object')for(const [k,n]of Object.entries(v.daily).slice(-30))if(/^\d{4}-\d{2}-\d{2}$/.test(k))d.daily[k]=Math.floor(num(n));return d}
 const MISSIONS=[{id:'fish',title:'A decent lunch',text:'Collect 15 fish across flights.',goal:15,stat:'fish',reward:10},{id:'near',title:'Living on the edge',text:'Make 3 successful near misses.',goal:3,stat:'near',reward:15},{id:'worlds',title:'Wrong turn at the sky',text:'Discover the Kitchen Dimension.',goal:1,stat:'worlds',reward:15},{id:'escapes',title:'Unbe-weave-able',text:'Escape one yarn tangle.',goal:1,stat:'escapes',reward:8},{id:'dashes',title:'Unscheduled acceleration',text:'Activate Zoomies or Pounce 3 times.',goal:3,stat:'dashes',reward:15}];
+const MILESTONES=[
+ {id:'first-flight',title:'First flight!',text:'Finish your first flight.',goal:1,stat:'runs',group:'totals'},
+ {id:'ten-obstacles',title:'Finding your wings',text:'Pass 10 obstacles in one flight.',goal:10,stat:'passed',group:'records'},
+ {id:'fish-fifty',title:'A basket of fish',text:'Collect 50 fish across flights.',goal:50,stat:'fish',group:'totals'},
+ {id:'five-flights',title:'Keep on flying',text:'Finish 5 flights.',goal:5,stat:'runs',group:'totals'},
+ {id:'minute-menace',title:'A whole minute!',text:'Fly for 60 seconds in one flight.',goal:60,stat:'seconds',group:'records'},
+ {id:'combo-three',title:'Paw-some dodging',text:'Reach a 3× near-miss combo.',goal:3,stat:'combo',group:'records'},
+ {id:'world-tour',title:'Little explorer',text:'Pass 12 obstacles in one flight.',goal:12,stat:'passed',group:'records'},
+ {id:'no-rescue',title:'On my own wings',text:'Pass 6 obstacles without using a heart.',goal:6,stat:'cleanPassed',group:'records'}
+];
+function milestoneProgress(data,m){return data.achievements.includes(m.id)?m.goal:Math.min(m.goal,data[m.group]?.[m.stat]||0)}
 class Store{
  constructor(storage){this.storage=storage;this.credited=new WeakSet();this.available=!!storage;try{this.data=normalize(JSON.parse(storage?.getItem(KEY)||'null'))}catch{this.data=defaults()}this.baseline=structuredClone(this.data)}
  sync(){
@@ -244,7 +277,8 @@ class Store{
    // Rebase local changes onto current storage. Currency changes include spending.
    for(const k of ['balance','tokens'])latest[k]=Math.max(0,latest[k]+local[k]-base[k]);
    latest.best=Math.max(latest.best,local.best);latest.relaxedBest=Math.max(latest.relaxedBest,local.relaxedBest);
-   for(const k of ['unlocked','outfits','missions','achievements'])latest[k]=[...new Set([...latest[k],...local[k]])];
+   for(const k of ['unlocked','outfits','missions','achievements','discoveries'])latest[k]=[...new Set([...latest[k],...local[k]])];
+   for(const k of Object.keys(latest.records))latest.records[k]=Math.max(latest.records[k],local.records[k]);
    for(const k of Object.keys(latest.totals))latest.totals[k]+=Math.max(0,local.totals[k]-base.totals[k]);
    for(const [k,v]of Object.entries(local.daily))latest.daily[k]=Math.max(latest.daily[k]||0,v);
    latest.walkthroughComplete ||= local.walkthroughComplete;
@@ -257,11 +291,11 @@ class Store{
  buyCat(id){this.sync();const c=ROSTER[id],d=this.data;if(!c||d.unlocked.includes(id)||d.balance<c.cost)return false;d.balance-=c.cost;d.unlocked.push(id);this.write();return true}
  selectCat(id){this.sync();if(!this.data.unlocked.includes(id))return false;this.data.selected=id;this.write();return true}
  buyOutfit(id){this.sync();const d=this.data;if(d.outfits.includes(id)||!['goggles','crown'].includes(id))return false;const currency=id==='crown'?'tokens':'balance',cost=id==='crown'?3:15;if(d[currency]<cost)return false;d[currency]-=cost;d.outfits.push(id);d.outfit=id;this.write();return true}
- settle(run,daily=''){if(run.lab||run.tutorial||run.state!=='over'||this.credited.has(run))return null;this.credited.add(run);this.sync();const d=this.data;if(run.mode==='relaxed'){const newBest=run.score>d.relaxedBest;d.relaxedBest=Math.max(d.relaxedBest,run.score);this.write();return{newBest,completed:[],relaxed:true}}const newBest=run.score>d.best;d.best=Math.max(d.best,run.score);d.balance+=run.fish;d.tokens+=run.tokens;d.totals.runs++;d.totals.fish+=run.fish;d.totals.near+=run.near;d.totals.worlds+=Math.floor(run.passed/6);d.totals.escapes+=run.escapes;d.totals.dashes+=run.dashes;const completed=[];for(const m of MISSIONS)if(!d.missions.includes(m.id)&&d.totals[m.stat]>=m.goal){d.missions.push(m.id);d.balance+=m.reward;completed.push(m)}for(const [id,yes]of [['first-flight',true],['minute-menace',run.time>=60],['combo-three',run.bestCombo>=3],['world-tour',run.passed>=12],['no-rescue',run.passed>=6&&run.usedRescues===0]])if(yes&&!d.achievements.includes(id))d.achievements.push(id);if(daily)d.daily[daily]=Math.max(d.daily[daily]||0,run.score);this.write();return{newBest,completed}}
+ settle(run,daily=''){if(run.lab||run.tutorial||run.state!=='over'||this.credited.has(run))return null;this.credited.add(run);this.sync();const d=this.data;if(run.mode==='relaxed'){for(const id of run.discoveries?.found||[])if(['luna-trail','coco-trail','pepe-trail'].includes(id)&&!d.discoveries.includes(id))d.discoveries.push(id);const newBest=run.score>d.relaxedBest;d.relaxedBest=Math.max(d.relaxedBest,run.score);this.write();return{newBest,completed:[],relaxed:true}}d.records.passed=Math.max(d.records.passed,run.passed);d.records.seconds=Math.max(d.records.seconds,Math.floor(run.time));d.records.combo=Math.max(d.records.combo,run.bestCombo);if(run.usedRescues===0)d.records.cleanPassed=Math.max(d.records.cleanPassed,run.passed);const newBest=run.score>d.best;d.best=Math.max(d.best,run.score);d.balance+=run.fish;d.tokens+=run.tokens;d.totals.runs++;d.totals.fish+=run.fish;d.totals.near+=run.near;d.totals.worlds+=Math.floor(run.passed/6);d.totals.escapes+=run.escapes;d.totals.dashes+=run.dashes;const completed=[];for(const m of MISSIONS)if(!d.missions.includes(m.id)&&d.totals[m.stat]>=m.goal){d.missions.push(m.id);d.balance+=m.reward;completed.push(m)}const milestones=[];for(const m of MILESTONES)if(!d.achievements.includes(m.id)&&milestoneProgress(d,m)>=m.goal){d.achievements.push(m.id);milestones.push(m)}if(daily)d.daily[daily]=Math.max(d.daily[daily]||0,run.score);this.write();return{newBest,completed,milestones}}
 }
 function dailyKey(){return new Date().toISOString().slice(0,10)}
 function dailySeed(key){return [...key].reduce((a,c)=>Math.imul(a^c.charCodeAt(0),16777619)>>>0,2166136261)}
-root.CatSave={Store,normalize,defaults,MISSIONS,dailyKey,dailySeed};if(typeof module!=='undefined')module.exports=root.CatSave;
+root.CatSave={Store,normalize,defaults,MISSIONS,MILESTONES,milestoneProgress,dailyKey,dailySeed};if(typeof module!=='undefined')module.exports=root.CatSave;
 })(globalThis);
 </script><script>(function(root){
 class Audio{
@@ -346,6 +380,8 @@ function home(c,t,selected='biscuit',motion=true,outfit='none'){
   cat(c,0,0,t,spot.id,'curious',1,0,spot.id===selected?outfit:'none',{motion,idle:true});c.restore();
  }
 }
+// Decorative cycles use elapsed simulation time, never course randomness.
+function ambience(seed,time,world,motion=true){const phase=((time+Math.abs(seed%13))%36)/36;return{strength:motion?Math.sin(Math.PI*phase)**4*.18:0,kind:['rain','crumbs','fireflies'][world]||'rain',surprise:motion&&time%28>19&&time%28<25,phase:motion?time:0}}
 class Renderer{
  constructor(canvas){this.canvas=canvas;this.c=canvas.getContext('2d');this.particles=[];this.debug=false;this.motion=true;this.world=0;this.palette={...palettes[0]}}
  burst(x,y,type){if(!this.motion)return;for(let i=0;i<12;i++)this.particles.push({x,y,vx:(Math.random()-.5)*160,vy:(Math.random()-.6)*170,life:.6,kind:type});this.particles=this.particles.slice(-120)}
@@ -357,8 +393,9 @@ class Renderer{
   for(let i=0;i<7;i++){const x=((i*90-distance*.22)%630+630)%630-90,h=115+(i%3)*55;rr(c,x,565-h,78,h+120,6,p.building);if((run?.world||0)===0){path(c,[[x-6,565-h],[x+39,535-h],[x+84,565-h]],p.building)}for(let j=0;j<3;j++)rr(c,x+12+j*19,590-h,9,15,3,p.light)}
   if((run?.world||0)===1){for(let i=0;i<5;i++)rr(c,i*105-25,540,90,120,8,'#d2aa8e','#c69b83')}
   if((run?.world||0)===2){for(let i=0;i<14;i++){const x=(i*113+20)%450,y=(i*73)%510;c.fillStyle='#f5d999';c.fillRect(x,y,2,3)}for(let i=0;i<3;i++){c.save();c.translate(i*190-distance*.08%190,560);c.rotate(-.2);rr(c,-35,-18,70,36,12,'#c1b5e0');c.restore()}}
+  if(run)this.environment(run);
   if(run?.encounter>0){rr(c,350,85,110,120,27,'#997484','#604b68');rr(c,363,105,70,29,11,'#f3ceb0','#604b68');ellipse(c,382,117,6,6,'#493e3a');ellipse(c,417,117,6,6,'#493e3a');for(let i=0;i<4;i++)line(c,[[370,151+i*10],[438,151+i*10]],'#604b68',4);c.font='bold 11px Arial';c.fillStyle='#604b68';c.fillText('SUCK-O-MATIC',340,70);c.fillText(Math.ceil(run.encounter)+'s',390,222)}
-  if(run){for(const g of run.gates)this.obstacle(g,t,run);for(const f of run.items)this.item(f,t);this.mischief(run,t)}
+  if(run){for(const g of run.gates)this.obstacle(g,t,run);for(const f of run.items)this.item(f,t);this.mischief(run,t);this.discovery(run)}
   c.fillStyle=p.front;c.fillRect(0,C.floor,450,60);line(c,[[0,C.floor],[450,C.floor]],'#5a8277',3);
   for(let i=0;i<17;i++){const x=((i*35-distance*.6)%595+595)%595;line(c,[[x,C.floor+10],[x+10,C.floor+10]],'#d8e5c3',3)}
   const y=run?run.y:330+Math.sin(t*2)*8;
@@ -373,6 +410,15 @@ class Renderer{
   for(const a of this.particles){a.life-=dt;a.x+=a.vx*dt;a.y+=a.vy*dt;a.vy+=150*dt;c.globalAlpha=Math.max(0,a.life/.6);ellipse(c,a.x,a.y,3,3,a.kind==='near'?'#fff3bd':'#ed9e6e');if(a.kind==='near'){ellipse(c,a.x-4,a.y-4,1.5,1.5,'#fff3bd');ellipse(c,a.x+4,a.y-4,1.5,1.5,'#fff3bd')}}c.globalAlpha=1;this.particles=this.particles.filter(a=>a.life>0);
   if(this.debug&&run){c.strokeStyle='#e94765';c.beginPath();c.arc(C.x,run.y,C.r,0,7);c.stroke();for(const g of run.gates){for(const r of run.shapes(g))c.strokeRect(r.x,r.y,r.w,r.h);c.strokeStyle='#268c72';c.strokeRect(g.x,g.center-g.gap/2,90,g.gap);c.strokeStyle='#e94765'}}
  }
+ environment(run){const c=this.c,a=ambience(run.seed,run.time,run.world,this.motion);c.save();c.globalAlpha=a.strength;
+  for(let i=0;i<22;i++){const x=(i*83+a.phase*18)%C.W,y=(i*61+a.phase*(a.kind==='rain'?42:9))%560;
+   if(a.kind==='rain')line(c,[[x,y],[x-3,y+12]],'#527f85',1);else ellipse(c,x,y,2,2,a.kind==='fireflies'?'#fff4b9':'#fff1d2');}
+  if(a.surprise){c.globalAlpha=.35;const x=350+Math.sin(a.phase)*12,y=160;
+   if(run.cat==='biscuit'){ellipse(c,x-5,y,6,9,'#bc7e9b');ellipse(c,x+5,y,6,9,'#bc7e9b');line(c,[[x,y-6],[x,y+7]],'#765c7b',2)}
+   else if(run.cat==='mochi'){ellipse(c,x,y,27,10,'#fffbed');ellipse(c,x-8,y-7,12,12,'#fffbed');ellipse(c,x+9,y-4,14,13,'#fffbed')}
+   else{rr(c,x-18,525,36,25,3,'#cba77d');line(c,[[x-18,525],[x,534],[x+18,525]],'#92785b',2)}}c.restore();
+ }
+ discovery(run){const c=this.c;for(const trail of run.discoveries?.trails||[]){c.save();c.setLineDash([2,6]);line(c,trail.points.map(p=>[p.x,p.y]),'#8a7455',1);c.setLineDash([]);for(const p of trail.points)if(!p.taken){path(c,[[p.x,p.y-8],[p.x+3,p.y-3],[p.x+8,p.y],[p.x+3,p.y+3],[p.x,p.y+8],[p.x-3,p.y+3],[p.x-8,p.y],[p.x-3,p.y-3]],'#fff1a6','#8a7455')}c.restore()}}
  mischief(run,t){
   const c=this.c,m=run.mischief;if(!m)return;
   for(const a of m.reactions){
@@ -408,7 +454,7 @@ class Renderer{
  }
  }
 }
-root.CatArt={Renderer,cat,fish,rr,palettes,personality,home};
+root.CatArt={Renderer,cat,fish,rr,palettes,personality,home,ambience};
 })(globalThis);
 </script><script>/* Optional online scores. Offline failures never interrupt a flight. */
 (function(root){
@@ -506,7 +552,7 @@ function menu(){
  p.append(button(save.walkthroughComplete?'Let’s play  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
  if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
  const row=document.createElement('div');row.className='menu-row';
- row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));row.append(button('Our cats',ourCats));if(rootBoard())row.append(button('Global top 100',leaderboard));p.append(row);
+ row.append(button('Cats',collection),button('Outfits',closet),button('Missions',missions),button('Milestones',milestones),button('Settings',()=>settings(menu)),button('Daily flight',()=>start(true)),button('Walkthrough',startWalkthrough));row.append(button('Our cats',ourCats));if(rootBoard())row.append(button('Global top 100',leaderboard));p.append(row);
  const h=flightHelp();const help=document.createElement('details');help.className='menu-help';const helpTitle=document.createElement('summary');helpTitle.textContent='How to play';help.append(helpTitle);note(help,h.flap+' to go up. Stop to float down.');note(help,h.dash+' when full. '+h.pause+'.');note(help,'Hearts give another chance · carry up to 2');p.append(help);const dedication=document.createElement('p');dedication.className='menu-dedication';dedication.textContent='For Luna, Coco, and Pepe. Always close to our hearts.';p.append(dedication);
 }
 function rootBoard(){return globalThis.CatBoard}
@@ -568,8 +614,18 @@ function missions(){
  }
  if(save.missions.length===CatSave.MISSIONS.length)note(p,'All missions complete. An accomplished menace.');
  note(p,save.missions.length+' missions complete · '+save.achievements.length+' achievements');
- if(save.achievements.length)note(p,save.achievements.map(a=>a.replaceAll('-',' ')).join(' · '));
+ if(save.achievements.length)note(p,save.achievements.map(a=>CatSave.MILESTONES.find(m=>m.id===a)?.title||a.replaceAll('-',' ')).join(' · '));
  note(p,'Daily best: '+(save.daily[CatSave.dailyKey()]||0));p.append(button('Back',menu));
+}
+function milestones(){
+ mode='milestones';const p=show('<span class="eyebrow">YOUR LITTLE VICTORIES</span><h2>Look how far<br>you’ve flown.</h2>');
+ note(p,'Classic and Daily flights count. Badges celebrate your progress; no extra fish are awarded.');
+ for(const m of CatSave.MILESTONES){const earned=save.achievements.includes(m.id),value=CatSave.milestoneProgress(save,m),card=document.createElement('div');card.className='milestone-card'+(earned?' earned':'');
+ const title=document.createElement('b');title.textContent=(earned?'✓ ':'')+m.title;card.append(title);note(card,m.text);
+ const status=document.createElement('span');status.textContent=earned?'Badge earned':value+' / '+m.goal;card.append(status);
+ const progress=document.createElement('progress');progress.max=m.goal;progress.value=value;progress.setAttribute('aria-label',m.title+' progress');card.append(progress);p.append(card)}
+ if(globalThis.CatDiscovery){const title=document.createElement('h3');title.textContent='Relaxed discoveries';p.append(title);note(p,'Optional star trails save keepsakes, not points. Fly with each cat to find theirs.');for(const memory of Object.values(CatDiscovery.MEMORIES)){const card=document.createElement('div');card.className='milestone-card';note(card,(save.discoveries.includes(memory.id)?'✓ Found: ':'Not found yet: ')+memory.title);p.append(card)}}
+ p.append(button('Back',menu));
 }
 function settings(back){
  mode='settings';const p=show('<span class="eyebrow">ADJUST THE CHAOS</span><h2>Creature comforts.</h2>');
@@ -622,10 +678,12 @@ function pause(){
 }
 function resume(){if(!run)return;run.state='playing';$('#screen').className='screen empty';mode='playing';acc=0;last=0;canvas.focus()}
 function over(){
- mode='over';report=store.settle(run,daily);$('#live-controls').hidden=true;if(report?.newBest)audio.play('unlock');
+ mode='over';report=store.settle(run,daily);$('#live-controls').hidden=true;if(report?.newBest||report?.milestones?.length)audio.play('unlock');
  const names={ground:'A little tumble! Try a few small flaps.',ceiling:'A little too high! Let your cat float down.',laundry:'Watch out for the laundry next time!',pigeon:'Watch the dotted line to dodge pigeons.',vacuum:'Fly through the open gap to dodge the vacuum.',toast:'Watch out for the toast! Try again.',fan:'Give the fan a little more space.',yarn:'Caught in yarn! Tap three times to get free.'};
  const p=show('<span class="eyebrow">'+(run.lab?'LAB FLIGHT · NO REWARDS':run.mode==='relaxed'?'RELAXED FLIGHT · LOCAL BEST ONLY':daily?'DAILY FLIGHT · '+daily:'FLIGHT REPORT')+'</span><h2>'+(report?.newBest?'A new record!':'Nice try!')+'</h2><p>'+names[run.death]+'</p><div class="result-grid"><div><b>'+run.score+'</b>SCORE</div><div><b>'+(run.mode==='relaxed'?save.relaxedBest:save.best)+'</b>BEST</div><div><b>'+run.fish+'</b>FISH '+(run.lab||run.mode==='relaxed'?'CAUGHT':'SAVED')+'</div><div><b>'+run.near+' / '+run.bestCombo+'×</b>NEAR MISSES / COMBO</div></div><details class="flight-details"><summary>Flight details &amp; cat adventure</summary><p>'+run.passed+' obstacles passed. Keep practicing—you’ve got this!<br>Distance '+(run.stats.distance||0)+' · Passes '+run.stats.pass+' · Fish '+run.stats.fish+'<br>Dodges '+run.stats.near+' · Worlds '+run.stats.world+' · Events '+(run.stats.event||0)+' · Mischief '+(run.stats.mischief||0)+'<br>'+run.escapes+' tangles escaped · '+run.blocks+' boxes sacrificed.</p></details>');
  const details=p.querySelector('.flight-details');
+ if(run.discoveries?.found.length)for(const id of run.discoveries.found){const memory=Object.values(CatDiscovery.MEMORIES).find(m=>m.id===id);if(memory)note(details,'Discovery: '+memory.title+' · saved as a keepsake')}
+ if(report?.milestones?.length){const badge=document.createElement('div');badge.className='milestone-banner';badge.setAttribute('role','status');badge.textContent='New badge: '+report.milestones[0].title+(report.milestones.length>1?' +'+(report.milestones.length-1)+' more':'');p.append(badge);for(const m of report.milestones)note(details,'Badge earned: '+m.title+' · '+m.text)}
  if(run.mischief){
   const m=run.mischief.counts,parts=[];
   if(m.pots)parts.push(m.pots+' flowerpot'+(m.pots===1?'':'s')+' smashed');
@@ -677,7 +735,7 @@ $('#pause').onclick=pause;
 $('#skip-lesson').onclick=()=>start(false);
 $('.brand').onclick=e=>{e.preventDefault();menu()};
 $('#sound').onclick=()=>{audio.init();save.settings.mute=!save.settings.mute;applySettings();store.write()};
-window.addEventListener('storage',e=>{if(e.key!=='catastrophe-v1')return;store.sync();selected=save.selected;applySettings();if(mode==='menu')menu();else if(mode==='collection')collection();else if(mode==='closet')closet();else if(mode==='missions')missions()});
+window.addEventListener('storage',e=>{if(e.key!=='catastrophe-v1')return;store.sync();selected=save.selected;applySettings();if(mode==='menu')menu();else if(mode==='collection')collection();else if(mode==='closet')closet();else if(mode==='missions')missions();else if(mode==='milestones')milestones()});
 window.addEventListener('blur',()=>{if(mode==='playing')pause()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&mode==='playing')pause()});
 function frame(ms){

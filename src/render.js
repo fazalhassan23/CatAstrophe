@@ -71,6 +71,8 @@ function home(c,t,selected='biscuit',motion=true,outfit='none'){
   cat(c,0,0,t,spot.id,'curious',1,0,spot.id===selected?outfit:'none',{motion,idle:true});c.restore();
  }
 }
+// Decorative cycles use elapsed simulation time, never course randomness.
+function ambience(seed,time,world,motion=true){const phase=((time+Math.abs(seed%13))%36)/36;return{strength:motion?Math.sin(Math.PI*phase)**4*.18:0,kind:['rain','crumbs','fireflies'][world]||'rain',surprise:motion&&time%28>19&&time%28<25,phase:motion?time:0}}
 class Renderer{
  constructor(canvas){this.canvas=canvas;this.c=canvas.getContext('2d');this.particles=[];this.debug=false;this.motion=true;this.world=0;this.palette={...palettes[0]}}
  burst(x,y,type){if(!this.motion)return;for(let i=0;i<12;i++)this.particles.push({x,y,vx:(Math.random()-.5)*160,vy:(Math.random()-.6)*170,life:.6,kind:type});this.particles=this.particles.slice(-120)}
@@ -82,8 +84,9 @@ class Renderer{
   for(let i=0;i<7;i++){const x=((i*90-distance*.22)%630+630)%630-90,h=115+(i%3)*55;rr(c,x,565-h,78,h+120,6,p.building);if((run?.world||0)===0){path(c,[[x-6,565-h],[x+39,535-h],[x+84,565-h]],p.building)}for(let j=0;j<3;j++)rr(c,x+12+j*19,590-h,9,15,3,p.light)}
   if((run?.world||0)===1){for(let i=0;i<5;i++)rr(c,i*105-25,540,90,120,8,'#d2aa8e','#c69b83')}
   if((run?.world||0)===2){for(let i=0;i<14;i++){const x=(i*113+20)%450,y=(i*73)%510;c.fillStyle='#f5d999';c.fillRect(x,y,2,3)}for(let i=0;i<3;i++){c.save();c.translate(i*190-distance*.08%190,560);c.rotate(-.2);rr(c,-35,-18,70,36,12,'#c1b5e0');c.restore()}}
+  if(run)this.environment(run);
   if(run?.encounter>0){rr(c,350,85,110,120,27,'#997484','#604b68');rr(c,363,105,70,29,11,'#f3ceb0','#604b68');ellipse(c,382,117,6,6,'#493e3a');ellipse(c,417,117,6,6,'#493e3a');for(let i=0;i<4;i++)line(c,[[370,151+i*10],[438,151+i*10]],'#604b68',4);c.font='bold 11px Arial';c.fillStyle='#604b68';c.fillText('SUCK-O-MATIC',340,70);c.fillText(Math.ceil(run.encounter)+'s',390,222)}
-  if(run){for(const g of run.gates)this.obstacle(g,t,run);for(const f of run.items)this.item(f,t);this.mischief(run,t)}
+  if(run){for(const g of run.gates)this.obstacle(g,t,run);for(const f of run.items)this.item(f,t);this.mischief(run,t);this.discovery(run)}
   c.fillStyle=p.front;c.fillRect(0,C.floor,450,60);line(c,[[0,C.floor],[450,C.floor]],'#5a8277',3);
   for(let i=0;i<17;i++){const x=((i*35-distance*.6)%595+595)%595;line(c,[[x,C.floor+10],[x+10,C.floor+10]],'#d8e5c3',3)}
   const y=run?run.y:330+Math.sin(t*2)*8;
@@ -98,6 +101,15 @@ class Renderer{
   for(const a of this.particles){a.life-=dt;a.x+=a.vx*dt;a.y+=a.vy*dt;a.vy+=150*dt;c.globalAlpha=Math.max(0,a.life/.6);ellipse(c,a.x,a.y,3,3,a.kind==='near'?'#fff3bd':'#ed9e6e');if(a.kind==='near'){ellipse(c,a.x-4,a.y-4,1.5,1.5,'#fff3bd');ellipse(c,a.x+4,a.y-4,1.5,1.5,'#fff3bd')}}c.globalAlpha=1;this.particles=this.particles.filter(a=>a.life>0);
   if(this.debug&&run){c.strokeStyle='#e94765';c.beginPath();c.arc(C.x,run.y,C.r,0,7);c.stroke();for(const g of run.gates){for(const r of run.shapes(g))c.strokeRect(r.x,r.y,r.w,r.h);c.strokeStyle='#268c72';c.strokeRect(g.x,g.center-g.gap/2,90,g.gap);c.strokeStyle='#e94765'}}
  }
+ environment(run){const c=this.c,a=ambience(run.seed,run.time,run.world,this.motion);c.save();c.globalAlpha=a.strength;
+  for(let i=0;i<22;i++){const x=(i*83+a.phase*18)%C.W,y=(i*61+a.phase*(a.kind==='rain'?42:9))%560;
+   if(a.kind==='rain')line(c,[[x,y],[x-3,y+12]],'#527f85',1);else ellipse(c,x,y,2,2,a.kind==='fireflies'?'#fff4b9':'#fff1d2');}
+  if(a.surprise){c.globalAlpha=.35;const x=350+Math.sin(a.phase)*12,y=160;
+   if(run.cat==='biscuit'){ellipse(c,x-5,y,6,9,'#bc7e9b');ellipse(c,x+5,y,6,9,'#bc7e9b');line(c,[[x,y-6],[x,y+7]],'#765c7b',2)}
+   else if(run.cat==='mochi'){ellipse(c,x,y,27,10,'#fffbed');ellipse(c,x-8,y-7,12,12,'#fffbed');ellipse(c,x+9,y-4,14,13,'#fffbed')}
+   else{rr(c,x-18,525,36,25,3,'#cba77d');line(c,[[x-18,525],[x,534],[x+18,525]],'#92785b',2)}}c.restore();
+ }
+ discovery(run){const c=this.c;for(const trail of run.discoveries?.trails||[]){c.save();c.setLineDash([2,6]);line(c,trail.points.map(p=>[p.x,p.y]),'#8a7455',1);c.setLineDash([]);for(const p of trail.points)if(!p.taken){path(c,[[p.x,p.y-8],[p.x+3,p.y-3],[p.x+8,p.y],[p.x+3,p.y+3],[p.x,p.y+8],[p.x-3,p.y+3],[p.x-8,p.y],[p.x-3,p.y-3]],'#fff1a6','#8a7455')}c.restore()}}
  mischief(run,t){
   const c=this.c,m=run.mischief;if(!m)return;
   for(const a of m.reactions){
@@ -133,5 +145,5 @@ class Renderer{
  }
  }
 }
-root.CatArt={Renderer,cat,fish,rr,palettes,personality,home};
+root.CatArt={Renderer,cat,fish,rr,palettes,personality,home,ambience};
 })(globalThis);

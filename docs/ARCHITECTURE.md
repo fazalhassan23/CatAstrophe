@@ -68,3 +68,11 @@ CatArt.home draws the decorative room and all three approved cats into .home-roo
 ## Flight-mode boundary
 
 Run(seed, cat, {mode}) defaults to classic; relaxed changes generation/travel and starting rescues while retaining core flap physics. App session flightStyle selects mode; Daily and walkthrough override to classic. Store.settle handles relaxedBest separately and returns before progression settlement. Browser leaderboard UI excludes relaxed and the API rejects explicit non-classic mode payloads; this does not make client-submitted mode cryptographically trustworthy. Any future relaxed online board needs a distinct server-owned ticket/board contract.
+
+## Milestone records
+
+CatSave.MILESTONES defines eight badges; milestoneProgress reads either cumulative totals or best-flight records. Save records passed/seconds/combo/cleanPassed normalize independently and merge by maximum across stale snapshots. Existing achievement IDs remain the earned set, merged by union. Store.settle updates records only after tutorial/lab/Relaxed exclusion, collects newly earned definitions into report.milestones, then writes once. The app uses this report for a static result banner and shows all progress on the Milestones screen. New badges add no currency; mission settlement remains unchanged.
+
+
+### Discovery system
+Load discoveries.js after core.js and before constructing runs. Run owns an optional CatDiscovery.System; it receives gate spawns and fixed-step displacement after mischief updates. System only tracks collectible coordinates and cosmetic found IDs, never RNG/collision/reward state. Renderer draws trails and ambient effects independently. Store normalizes/merges the three known discovery IDs and saves them only during eligible Relaxed settlement. Tests: tests/discoveries.cjs.

@@ -91,3 +91,9 @@ See [the staged improvement checklist](docs/IMPROVEMENT-CHECKLIST.md). Stage 1 p
 Stage 2 adds the cozy home room and direct cat-selection controls. Locked friends remain in the room; unlock them in Cats to fly with them. All 75 tests pass; browser visual review remains pending because the automation runtime cannot start.
 
 Stage 3 adds **Relaxed flight**: wider gaps, slower travel, a simpler opening and two starting hearts. It saves a separate local best, without banked currency/progression or competitive submissions. Classic and Daily rules remain unchanged. The suite now passes 83 tests; human balancing and current visual review are still pending.
+
+Stage 4 adds **Milestones**: eight personal badges, saved progress and compact result celebrations. Classic/Daily count; badges do not grant extra currency. All 91 tests pass; browser visual review remains pending.
+
+
+### Relaxed discoveries
+Optional three-star trails offer one saved keepsake for Luna, Coco and Pepe. Catch every star in a trail, then finish the flight to save it. Check Milestones → Relaxed discoveries. Skipping trails has no penalty; they award no points or currency. Classic/Daily have no trails. Gentle background weather and cat-themed scenery respect reduced motion.

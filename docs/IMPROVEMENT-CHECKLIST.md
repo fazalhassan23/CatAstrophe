@@ -23,17 +23,17 @@ Updated 2026-10-23. Work proceeds one stage at a time; review each stage before 
 - [x] Separate local Relaxed best; no banked rewards, missions, online tickets or score form. Daily always forces Classic.
 
 ## 4. Personal milestones
-- [ ] Achievable goals and brief encouraging celebrations.
-- [ ] Persist progress and prevent duplicate rewards.
+- [x] Eight named badge goals, including first flight, 10 obstacles, 50 fish and five flights; compact result celebrations.
+- [x] Saved best-flight records and existing badge IDs; once-only awards, old-save support and no extra currency rewards.
 
 ## 5. Discovery and variety
-- [ ] Weather/scenery variations and cat-specific surprises.
-- [ ] Prototype secret paths; preserve readable hazards and simple controls.
+- [x] Gentle weather/scenery variations and cat-specific background surprises; reduced-motion support.
+- [x] Optional Relaxed three-star corridor trails, per-cat saved keepsakes and discovery journal; no score/currency rewards.
 
 ## Every stage
 - [x] Stage 1 regressions and full suite/build: 72 tests passed.
 - [ ] UI review and mobile layout checks appropriate to the change.
-- [ ] Changelog and Git handoff updated.
+- [x] Changelog and Git handoff updated through Stage 5.
 - [ ] Owner reviews before the next stage.
 
 ### Stage 1 verification limit
@@ -44,3 +44,9 @@ Browser review could not run: the browser automation launcher failed while enume
 
 ### Stage 3 verification — 2026-10-23
 83 tests pass, including long Relaxed routes for all cats across ten seeds, gradual gaps/speed, original Classic generation rules, old-save defaults, cross-tab Relaxed record preservation, reward isolation, mode/restart/Daily behavior and competitive-form rejection. Standalone build passes. The browser launcher still fails on the unrelated locked BitLocker drive, so no current UI/responsive/device-performance sign-off is claimed. Human difficulty/feel review is required. Stage 4 has not started.
+
+### Stage 4 verification — 2026-10-23
+91 tests pass, including exact thresholds, repeated settlement, existing badge compatibility, malformed/old record defaults, cross-tab merging, all mode exclusions, milestone navigation and result celebration. Build succeeds. Browser startup failed again, so visual/responsive sign-off and physical-device checks remain pending. Stage 5 has not started.
+
+### Stage 5 verification — 2026-10-23
+97 tests pass and build succeeds. Course/RNG parity, optional point-free collectibles, persistence, mode exclusions and decorative rendering regressions pass. This completes implementation of stages 1–5. Visual/device/owner reviews above remain open because browser startup is unavailable; automated checks do not replace those reviews. User explicitly authorized continuing through Stage 5 while away. No further stage started.
