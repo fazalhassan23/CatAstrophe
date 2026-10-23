@@ -89,3 +89,5 @@ The characters honor Luna, Coco, and Pepe. Open **Our cats** from the menu, or *
 See [the staged improvement checklist](docs/IMPROVEMENT-CHECKLIST.md). Stage 1 personality animations are implemented and covered by 72 passing tests; visual owner review and physical mobile performance checks remain pending. Stage 2 has not started.
 
 Stage 2 adds the cozy home room and direct cat-selection controls. Locked friends remain in the room; unlock them in Cats to fly with them. All 75 tests pass; browser visual review remains pending because the automation runtime cannot start.
+
+Stage 3 adds **Relaxed flight**: wider gaps, slower travel, a simpler opening and two starting hearts. It saves a separate local best, without banked currency/progression or competitive submissions. Classic and Daily rules remain unchanged. The suite now passes 83 tests; human balancing and current visual review are still pending.

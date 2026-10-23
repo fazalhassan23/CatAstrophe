@@ -18,9 +18,9 @@ Updated 2026-10-23. Work proceeds one stage at a time; review each stage before 
 - [ ] Phone/tablet/landscape visual review (browser launcher currently unavailable).
 
 ## 3. Beginner difficulty
-- [ ] Assess opening gaps and warning time.
-- [ ] Gradual challenge and optional relaxed mode.
-- [ ] Separate relaxed scores from competitive boards.
+- [x] Assessed opening: Classic rules preserved for score comparability; Relaxed has wider gaps and more approach time.
+- [x] Added optional Relaxed curve: slower travel, simple first three obstacles, wider gaps, delayed reactions/encounter, two starting hearts.
+- [x] Separate local Relaxed best; no banked rewards, missions, online tickets or score form. Daily always forces Classic.
 
 ## 4. Personal milestones
 - [ ] Achievable goals and brief encouraging celebrations.
@@ -41,3 +41,6 @@ Browser review could not run: the browser automation launcher failed while enume
 
 ### Stage 2 verification — 2026-10-23
 75 tests pass and the standalone build succeeds. New tests cover safe locked-cat navigation without purchases, persistent owned selection and the chosen cat in the next flight, and all three cats/static reduced-motion room rendering. Responsive rules were added for short and landscape layouts, but no new browser/layout/performance result is claimed: both browser inspection attempts failed at launcher/kernel startup. Owner authorized proceeding to Stage 2; Stage 3 has not started.
+
+### Stage 3 verification — 2026-10-23
+83 tests pass, including long Relaxed routes for all cats across ten seeds, gradual gaps/speed, original Classic generation rules, old-save defaults, cross-tab Relaxed record preservation, reward isolation, mode/restart/Daily behavior and competitive-form rejection. Standalone build passes. The browser launcher still fails on the unrelated locked BitLocker drive, so no current UI/responsive/device-performance sign-off is claimed. Human difficulty/feel review is required. Stage 4 has not started.

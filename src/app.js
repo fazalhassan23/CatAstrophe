@@ -7,7 +7,7 @@ let storage;try{storage=localStorage}catch{}
 const store=new CatSave.Store(storage),save=store.data,params=new URLSearchParams(location.search);
 renderer.c.scale(2,2);
 let run=null,mode='menu',acc=0,last=0,toastTime=0,selected=save.selected,daily='',report=null,trainer=null;
-let photoDialog=null;
+let photoDialog=null,flightStyle='classic';
 function applySettings(){
  audio.volume=save.settings.mute?0:save.settings.fx;
  audio.music=save.settings.mute?0:save.settings.music;
@@ -21,7 +21,7 @@ function friendlyHint(text){const h=flightHelp();return text.replaceAll('Tap the
 function note(p,text){const n=document.createElement('p');n.textContent=text;p.append(n)}
 function menu(){
  mode='menu';run=null;trainer=null;$('#lesson').hidden=true;$('#toast').textContent='';daily='';$('#hud').hidden=true;$('#live-controls').hidden=true;updateCat();
- const p=show('<span class="eyebrow">LET’S HELP YOUR CAT FLY</span><h2>cat-astrophe!</h2><canvas class="home-room" width="600" height="230" role="img" aria-label="Luna, Coco and Pepe together in their cozy room. Choose a flying friend below."></canvas><p>Catch fish. Dodge obstacles. Come home together.</p><div class="meta"><span><b>'+save.best+'</b>PERSONAL BEST</span><span><b>'+save.balance+'</b>FISH BANK</span></div>');
+ const p=show('<span class="eyebrow">LET’S HELP YOUR CAT FLY</span><h2>cat-astrophe!</h2><canvas class="home-room" width="600" height="230" role="img" aria-label="Luna, Coco and Pepe together in their cozy room. Choose a flying friend below."></canvas><p>Catch fish. Dodge obstacles. Come home together.</p><div class="meta"><span><b>'+(flightStyle==='relaxed'?save.relaxedBest:save.best)+'</b>'+(flightStyle==='relaxed'?'RELAXED BEST':'CLASSIC BEST')+'</span><span><b>'+save.balance+'</b>FISH BANK</span></div>');
  const choices=document.createElement('div');choices.className='home-choices';choices.setAttribute('role','group');choices.setAttribute('aria-label','Choose your flying friend');
  for(const [id,cat]of Object.entries(ROSTER)){
   const owned=save.unlocked.includes(id),isSelected=selected===id;
@@ -31,6 +31,10 @@ function menu(){
   });choose.className='home-choice'+(isSelected?' is-selected':'');choose.setAttribute('aria-pressed',String(isSelected));choose.setAttribute('aria-label',owned?cat.name+(isSelected?', selected for flight':', select for flight'):cat.name+', locked. Unlock for '+cat.cost+' fish in Cats');choices.append(choose);
  }
  p.append(choices);
+ const styles=document.createElement('div');styles.className='flight-styles';styles.setAttribute('role','group');styles.setAttribute('aria-label','Flight difficulty');
+ for(const [id,label]of [['classic','Classic flight'],['relaxed','Relaxed flight']]){const option=button(label,()=>{flightStyle=id;menu()});option.className='flight-style'+(flightStyle===id?' is-selected':'');option.setAttribute('aria-pressed',String(flightStyle===id));styles.append(option)}p.append(styles);
+ note(p,flightStyle==='relaxed'?'Relaxed: wide gaps, slower flight, 2 hearts. Local best only; no banked rewards.':'Classic: the original challenge. Earn fish and compete online.');
+
  p.append(button(save.walkthroughComplete?'Let’s play  →':'Learn to fly  →',save.walkthroughComplete?()=>start(false):startWalkthrough,'play'));
  if(!save.walkthroughComplete)p.append(button('Play now · skip practice',()=>start(false)));
  const row=document.createElement('div');row.className='menu-row';
@@ -117,8 +121,8 @@ function start(isDaily=!!daily,practice=false){
  trainer=null;$('#lesson').hidden=true;$('#toast').textContent='';
  audio.init();daily=isDaily?CatSave.dailyKey():'';
  const seed=params.has('seed')?Number(params.get('seed'))>>>0:Date.now()>>>0;
- run=new Run(daily?CatSave.dailySeed(daily):seed,daily?'biscuit':selected);
- if(rootBoard()&&!practice&&!params.has('dev'))run.onlineTicket=CatBoard.ticket(daily?'daily':'classic');
+ run=new Run(daily?CatSave.dailySeed(daily):seed,daily?'biscuit':selected,{mode:!daily&&!practice?flightStyle:'classic'});
+ if(rootBoard()&&run.mode!=='relaxed'&&!practice&&!params.has('dev'))run.onlineTicket=CatBoard.ticket(daily?'daily':'classic');
  run.outfit=save.outfit;report=null;mode='playing';acc=0;last=0;toastTime=0;
  $('#screen').className='screen empty';$('#hud').hidden=false;$('#live-controls').hidden=false;
  renderer.particles=[];run.flap();updateCat();canvas.focus();
@@ -152,7 +156,7 @@ function resume(){if(!run)return;run.state='playing';$('#screen').className='scr
 function over(){
  mode='over';report=store.settle(run,daily);$('#live-controls').hidden=true;if(report?.newBest)audio.play('unlock');
  const names={ground:'A little tumble! Try a few small flaps.',ceiling:'A little too high! Let your cat float down.',laundry:'Watch out for the laundry next time!',pigeon:'Watch the dotted line to dodge pigeons.',vacuum:'Fly through the open gap to dodge the vacuum.',toast:'Watch out for the toast! Try again.',fan:'Give the fan a little more space.',yarn:'Caught in yarn! Tap three times to get free.'};
- const p=show('<span class="eyebrow">'+(run.lab?'LAB FLIGHT · NO REWARDS':daily?'DAILY FLIGHT · '+daily:'FLIGHT REPORT')+'</span><h2>'+(report?.newBest?'A new record!':'Nice try!')+'</h2><p>'+names[run.death]+'</p><div class="result-grid"><div><b>'+run.score+'</b>SCORE</div><div><b>'+save.best+'</b>BEST</div><div><b>'+run.fish+'</b>FISH '+(run.lab?'CAUGHT':'SAVED')+'</div><div><b>'+run.near+' / '+run.bestCombo+'×</b>NEAR MISSES / COMBO</div></div><details class="flight-details"><summary>Flight details &amp; cat adventure</summary><p>'+run.passed+' obstacles passed. Keep practicing—you’ve got this!<br>Distance '+(run.stats.distance||0)+' · Passes '+run.stats.pass+' · Fish '+run.stats.fish+'<br>Dodges '+run.stats.near+' · Worlds '+run.stats.world+' · Events '+(run.stats.event||0)+' · Mischief '+(run.stats.mischief||0)+'<br>'+run.escapes+' tangles escaped · '+run.blocks+' boxes sacrificed.</p></details>');
+ const p=show('<span class="eyebrow">'+(run.lab?'LAB FLIGHT · NO REWARDS':run.mode==='relaxed'?'RELAXED FLIGHT · LOCAL BEST ONLY':daily?'DAILY FLIGHT · '+daily:'FLIGHT REPORT')+'</span><h2>'+(report?.newBest?'A new record!':'Nice try!')+'</h2><p>'+names[run.death]+'</p><div class="result-grid"><div><b>'+run.score+'</b>SCORE</div><div><b>'+(run.mode==='relaxed'?save.relaxedBest:save.best)+'</b>BEST</div><div><b>'+run.fish+'</b>FISH '+(run.lab||run.mode==='relaxed'?'CAUGHT':'SAVED')+'</div><div><b>'+run.near+' / '+run.bestCombo+'×</b>NEAR MISSES / COMBO</div></div><details class="flight-details"><summary>Flight details &amp; cat adventure</summary><p>'+run.passed+' obstacles passed. Keep practicing—you’ve got this!<br>Distance '+(run.stats.distance||0)+' · Passes '+run.stats.pass+' · Fish '+run.stats.fish+'<br>Dodges '+run.stats.near+' · Worlds '+run.stats.world+' · Events '+(run.stats.event||0)+' · Mischief '+(run.stats.mischief||0)+'<br>'+run.escapes+' tangles escaped · '+run.blocks+' boxes sacrificed.</p></details>');
  const details=p.querySelector('.flight-details');
  if(run.mischief){
   const m=run.mischief.counts,parts=[];
@@ -164,8 +168,9 @@ function over(){
   crime.innerHTML='<b>YOUR CAT ADVENTURE</b>';const text=document.createElement('p');text.textContent=parts.length?parts.join(' · '):'A peaceful flight. Try a Zoomies dash next time!';crime.append(text);details.append(crime);
   note(details,'Mischief bonus: '+(run.stats.mischief||0)+' points');
  }
+ if(run.mode==='relaxed')note(p,'Relaxed best is saved on this device. Fish and missions stay in Classic or Daily.');
  if(report?.completed.length)note(p,report.completed.map(m=>'Mission: '+m.title+' (+'+m.reward+' fish)').join(' · '));
- if(rootBoard()&&!run.lab&&!run.tutorial&&!params.has('dev'))CatBoard.mount(p,run,daily?'daily':'classic');
+ if(rootBoard()&&run.mode!=='relaxed'&&!run.lab&&!run.tutorial&&!params.has('dev'))CatBoard.mount(p,run,daily?'daily':'classic');
  p.append(button('Again. For science.  →',()=>start(),'play'),button('Main menu',menu));
 }
 function lab(){
@@ -228,7 +233,7 @@ function frame(ms){
   $('#charge').textContent=Math.floor(run.charge)+'%';
   $('#ability').disabled=mode!=='playing'||run.charge<(run.cat==='pounce'?65:100)||run.cooldown>0;
   $('#ability').firstChild.textContent=run.cat==='pounce'?'POUNCE ':'ZOOMIES ';
-  $('#effects').textContent=[run.armor>0?'BOX '+Math.ceil(run.armor)+'s':'',run.magnet>0?'MAGNET '+Math.ceil(run.magnet)+'s':'',run.nip>0?'CATNIP '+Math.ceil(run.nip)+'s':'','♥ '+run.rescues+' / 2',run.combo?'DODGE ×'+run.combo:''].filter(Boolean).join(' · ');
+  $('#effects').textContent=[run.mode==='relaxed'?'RELAXED':'',run.armor>0?'BOX '+Math.ceil(run.armor)+'s':'',run.magnet>0?'MAGNET '+Math.ceil(run.magnet)+'s':'',run.nip>0?'CATNIP '+Math.ceil(run.nip)+'s':'','♥ '+run.rescues+' / 2',run.combo?'DODGE ×'+run.combo:''].filter(Boolean).join(' · ');
  }
  $('#lesson').hidden=!(trainer&&mode==='playing');
  toastTime=Math.max(0,toastTime-dt);$('#toast').classList.toggle('show',toastTime>0&&mode==='playing'&&!run?.tutorial);

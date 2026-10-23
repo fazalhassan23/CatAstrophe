@@ -5,7 +5,7 @@ const {C,clamp}=CatCore;
 const TARGETS={pot:{label:'FLOWERPOT',points:12,fish:2},toast:{label:'STOLEN TOAST',points:8,fish:3},bell:{label:'DOORBELL',points:10,fish:2}};
 class System{
  constructor(run){this.run=run;this.targets=[];this.reactions=[];this.counts={pots:0,toast:0,bells:0,pigeons:0};this.serial=0}
- spawn(g){if(g.id<3||g.id%3!==0||this.run.encounter>0)return;const type=['pot','toast','bell'][this.serial%3];this.add(type,g.x-155,g.center-35)}
+ spawn(g){if(g.id<(this.run.mode==='relaxed'?6:3)||g.id%3!==0||this.run.encounter>0)return;const type=['pot','toast','bell'][this.serial%3];this.add(type,g.x-155,g.center-35)}
  add(type,x,y){const target={id:this.serial++,type,x,y:clamp(y,150,550),hit:false,age:0};this.targets.push(target);return target}
  award(points,fish){const r=this.run;r.score+=points;r.stats.mischief=(r.stats.mischief||0)+points;r.fish+=fish}
  strike(t){if(t.hit)return false;const r=this.run;t.hit=true;t.age=0;const reward=TARGETS[t.type];this.award(reward.points,reward.fish);this.counts[t.type==='pot'?'pots':t.type==='toast'?'toast':'bells']++;r.moodSet('proud',1.3);

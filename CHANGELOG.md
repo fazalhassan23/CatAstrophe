@@ -125,3 +125,9 @@ No verified release tag/version is assigned here. Historical implementation note
 - Added accessible cat selection: owned selection persists; locked cats show fish costs and open the collection without purchasing. Selected outfit appears on the chosen cat only.
 - Grouped instructions in an expandable How to play section and added short/landscape layout rules. No simulation or database changes.
 - 75 tests pass and build succeeds; browser startup remains blocked, so visual/responsive review is pending.
+
+## Stage 3 follow-up — 2026-10-23 (unreleased)
+
+- Added optional Relaxed flights with slower travel, wider gradually narrowing gaps, simple opening hazards, delayed mischief/encounter and two starting hearts. Classic/Daily curves remain unchanged for leaderboard comparability.
+- Added separate local Relaxed best, clearly labeled mode/results, no Relaxed banked progression, no online ticket/form, and rejection of explicitly non-Classic competitive submissions. Old saves default the new record field safely; Daily overrides the selected style.
+- 83 tests pass and build succeeds. Browser visual review remains blocked; human balancing review is pending.

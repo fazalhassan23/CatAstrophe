@@ -11,6 +11,7 @@ function verify(token,secret){
  if(age<0||age>86400000||!['classic','daily'].includes(data.board))throw Error('Flight ticket expired. Start a new flight.');return data;
 }
 function submission(body,secret){
+ if(body.mode&&body.mode!=='classic')throw Error('Only Classic and Daily flights can submit competitive scores.');
  const ticket=verify(body.token,secret),name=typeof body.name==='string'?body.name.trim().normalize('NFKC'):'';
  if(!/^[\p{L}\p{N} _.-]{1,20}$/u.test(name))throw Error('Use 1–20 letters, numbers, spaces, dots, dashes or underscores.');
  if(!['biscuit','mochi','pounce'].includes(body.cat)||ticket.board==='daily'&&body.cat!=='biscuit')throw Error('Invalid cat.');
