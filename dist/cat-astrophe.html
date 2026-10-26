@@ -108,6 +108,16 @@ function random(seed){let a=seed>>>0;return()=>{a+=0x6D2B79F5;let t=a;t=Math.imu
 const TYPES=['laundry','pigeon','vacuum','toast','fan','yarn'];
 const ROSTER={biscuit:{name:'Luna',title:'THE LITTLE SPARK',description:'A tiny girl who found warmth, love, and her playful spirit.',trait:'Steady flight. A playful little spark.',gravity:1,flap:1,speed:1,cost:0},mochi:{name:'Coco',title:'THE GENTLE SOUL',description:'Happiest in your lap, always close by. A gentle boy, dearly remembered.',trait:'18% lighter gravity, softer flaps, 7% slower flight.',gravity:.82,flap:.9,speed:.93,cost:20},pounce:{name:'Pepe',title:'THE LITTLE LION',description:'King of the house, with a soft spot for his human mom.',trait:'Sharper flaps, heavier fall. Precision Air Pounce ability.',gravity:1.08,flap:1.06,speed:1,cost:45}};
 function rectDistance(x,y,r){return Math.hypot(x-clamp(x,r.x,r.x+r.w),y-clamp(y,r.y,r.y+r.h))}
+// Pickups use the visible central body, separately from the forgiving hazard hitbox.
+// Sweep relative motion so flaps, dashes and magnet pulls cannot skip contact.
+function pickupTouches(x0,y0,x1,y1,catY0,catY1,kind='fish'){
+ const radius=kind==='star'?8:['fish','gold'].includes(kind)?12:18;
+ const rx=30+radius,ry=34+radius,cx=C.x+2;
+ const ax=(x0-cx)/rx,ay=(y0-(catY0-3))/ry,bx=(x1-cx)/rx,by=(y1-(catY1-3))/ry;
+ const dx=bx-ax,dy=by-ay,length=dx*dx+dy*dy;
+ const t=length?clamp(-(ax*dx+ay*dy)/length,0,1):0;
+ return (ax+t*dx)**2+(ay+t*dy)**2<=1;
+}
 class Run{
  constructor(seed=1,cat='biscuit',options={}){this.mode=options.mode==='relaxed'?'relaxed':'classic';this.seed=seed;this.rand=random(seed);this.rewardRand=random((seed^0x9e3779b9)>>>0);this.cat=ROSTER[cat]?cat:'biscuit';this.trait=ROSTER[this.cat];this.state='playing';this.time=0;this.distance=0;this.score=0;this.fish=0;this.passed=0;this.y=350;this.vy=0;this.flapAge=1;this.gates=[];this.items=[];this.events=[];this.next=this.mode==='relaxed'?260:220;this.center=350;this.id=0;this.death='';this.world=0;this.near=0;this.combo=0;this.bestCombo=0;this.comboTimer=0;this.slow=0;this.armor=0;this.tangle=0;this.taps=0;this.invuln=0;this.mood='curious';this.moodTime=0;this.stats={pass:0,fish:0,near:0,world:0};this.escapes=0;this.blocks=0;this.nip=0;this.magnet=0;this.dash=0;this.charge=0;this.cooldown=0;this.rescues=this.mode==='relaxed'?2:0;this.usedRescues=0;this.tokens=0;this.dashes=0;this.flaps=0;this.discoveries=root.CatDiscovery?new root.CatDiscovery.System(this):null;this.mischief=root.CatMischief?new root.CatMischief.System(this):null;}
  emit(type,data={}){this.events.push({type,...data})}
@@ -159,10 +169,11 @@ class Run{
   this.next-=dx;if(this.next<=0){this.spawn();this.next+=this.mode==='relaxed'?390:C.spacing}
   let force=0;
   for(const g of this.gates){g.x-=dx;g.age+=dt;if(g.type==='vacuum'&&Math.abs(g.x-C.x)<130&&this.y>g.center)force+=110*(1-Math.abs(g.x-C.x)/130);if(g.type==='fan'&&Math.abs(g.x-C.x)<80&&this.y>g.center)force-=135}
+  let pickupY=this.y;
   this.vy=clamp(this.vy+(C.gravity*this.trait.gravity*(this.world===2?.92:1)*(this.armor>0?1.16:1)+force)*dt,-420,C.maxFall);this.y+=this.vy*dt;
   for(const g of this.gates){
    const d=Math.min(...this.shapes(g).map(r=>g.type==='fan'?Math.max(0,Math.hypot(C.x-r.x-r.w/2,this.y-r.y-r.h/2)-40):rectDistance(C.x,this.y,r)));
-   if(d<C.r&&!this.recover(g)){this.end(g.type);return}
+   if(d<C.r){const before=this.y;if(!this.recover(g)){this.end(g.type);return}if(this.y!==before)pickupY=this.y}
    if(d>=C.r&&d<C.r+14&&!g.ignored&&this.invuln<=0)g.near=true;
    if(!g.passed&&g.x+100<C.x){g.passed=true;this.passed++;this.score+=10;this.stats.pass+=10;this.emit('pass');
     if(g.near&&!g.ignored){this.near++;this.combo=Math.min(5,this.combo+1);this.bestCombo=Math.max(this.bestCombo,this.combo);this.comboTimer=7;const points=5*this.combo;this.score+=points;this.stats.near+=points;this.charge=clamp(this.charge+22,0,100);this.slow=.17;this.moodSet('proud');this.emit('near',{text:'PAW-SOME DODGE!  ×'+this.combo})}
@@ -172,13 +183,14 @@ class Run{
     if(this.passed%6===0){this.world=(this.world+1)%3;this.score+=20;this.stats.world+=20;this.emit('world',{text:['BACK IN THE NEIGHBORHOOD','THE KITCHEN DIMENSION','THE CAT’S DREAM · lighter gravity'][this.world]})}
    }
   }
-  for(const f of this.items){f.x-=dx;const d=Math.hypot(f.x-C.x,f.y-this.y);if(this.magnet>0&&['fish','gold','mystery'].includes(f.kind)&&d<155&&d>1){const pull=Math.min(1,dt*6);f.x+=(C.x-f.x)*pull;f.y+=(this.y-f.y)*pull}if(d<C.r+12)this.collect(f)}
-  this.mischief?.step(dt,dx);this.discoveries?.step(dt,dx);if(this.state!=='playing')return;
+  for(const f of this.items){if(f.taken)continue;const oldX=f.x,oldY=f.y;f.x-=dx;const d=Math.hypot(f.x-C.x,f.y-this.y);if(this.magnet>0&&['fish','gold','mystery'].includes(f.kind)&&d<155&&d>1){const pull=Math.min(1,dt*6);f.x+=(C.x-f.x)*pull;f.y+=(this.y-f.y)*pull}if(pickupTouches(oldX,oldY,f.x,f.y,pickupY,this.y,f.kind))this.collect(f)}
+
+  this.mischief?.step(dt,dx);this.discoveries?.step(dt,dx,pickupY);if(this.state!=='playing')return;
   if(this.y<C.r+45||this.y>C.floor-C.r){const reason=this.y<C.r+45?'ceiling':'ground';if(this.invuln>0){this.y=clamp(this.y,C.r+45,C.floor-C.r);this.vy=reason==='ceiling'?100:-130}else if(!this.rescue())this.end(reason)}
   this.gates=this.gates.filter(g=>g.x>-160);this.items=this.items.filter(f=>f.x>-30&&!f.taken);
  }
 }
-root.CatCore={C,Run,random,rectDistance,clamp,TYPES,ROSTER};if(typeof module!=='undefined')module.exports=root.CatCore;
+root.CatCore={C,Run,random,rectDistance,clamp,TYPES,ROSTER,pickupTouches};if(typeof module!=='undefined')module.exports=root.CatCore;
 })(globalThis);
 </script><script>/* Optional pounce targets and telegraphed consequences, independent of level RNG. */
 (function(root){
@@ -216,7 +228,7 @@ root.CatMischief={System,TARGETS};if(typeof module!=='undefined')module.exports=
 })(globalThis);
 </script><script>/* Optional Relaxed trails: no damage, currency, charge, score or course RNG. */
 (function(root){
-const {C}=CatCore;
+const {C,pickupTouches}=CatCore;
 const MEMORIES={biscuit:{id:'luna-trail',title:'Luna’s butterfly trail',text:'A playful little detour for Luna.'},mochi:{id:'coco-trail',title:'Coco’s cloud trail',text:'A gentle path through the clouds.'},pounce:{id:'pepe-trail',title:'Pepe’s cozy hideaway',text:'A little adventure, with home never far away.'}};
 class System{
  constructor(run){this.run=run;this.trails=[];this.found=[]}
@@ -225,8 +237,8 @@ class System{
  this.trails.push({id:g.id,points:[0,1,2].map(i=>({x:g.x-145+i*38,y:g.center+side*(i===1?40:20),taken:false})),done:false});
  r.emit('discovery-hint',{text:'Optional star trail! Catch all 3 stars, or keep flying.'});
  }
- step(dt,dx){const r=this.run;if(r.state!=='playing')return;
- for(const trail of this.trails){for(const point of trail.points){point.x-=dx;if(!point.taken&&Math.hypot(point.x-C.x,point.y-r.y)<C.r+10)point.taken=true}
+ step(dt,dx,previousY=this.run.y){const r=this.run;if(r.state!=='playing')return;
+ for(const trail of this.trails){for(const point of trail.points){const oldX=point.x;point.x-=dx;if(!point.taken&&pickupTouches(oldX,point.y,point.x,point.y,previousY,r.y,'star'))point.taken=true}
  if(!trail.done&&trail.points.every(p=>p.taken)){trail.done=true;const memory=MEMORIES[r.cat];if(!this.found.includes(memory.id)){this.found.push(memory.id);r.emit('discovery',{text:'Discovery found: '+memory.title+' · a keepsake, no points'})}}
  }
  this.trails=this.trails.filter(t=>t.points.at(-1).x>-30&&!t.done);

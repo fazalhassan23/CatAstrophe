@@ -76,3 +76,7 @@ CatSave.MILESTONES defines eight badges; milestoneProgress reads either cumulati
 
 ### Discovery system
 Load discoveries.js after core.js and before constructing runs. Run owns an optional CatDiscovery.System; it receives gate spawns and fixed-step displacement after mischief updates. System only tracks collectible coordinates and cosmetic found IDs, never RNG/collision/reward state. Renderer draws trails and ambient effects independently. Store normalizes/merges the three known discovery IDs and saves them only during eligible Relaxed settlement. Tests: tests/discoveries.cjs.
+
+
+### Pickup collision versus hazard collision
+CatCore.pickupTouches sweeps relative collectible/cat movement against an expanded central-body ellipse. Item collection runs after magnetic attraction; discovery stars share the helper. It deliberately differs from C.r=15 for hazards. Rescue teleport positions reset the sweep origin. See tests/pickups.cjs for geometry, award and lifecycle regressions.
