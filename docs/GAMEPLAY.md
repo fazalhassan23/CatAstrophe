@@ -72,3 +72,7 @@ Optional three-star trails offer one saved keepsake for Luna, Coco and Pepe. Cat
 
 ### Animation preferences
 Settings → Animations controls fan blades, pigeon wings and cat movement. By default the game follows your device’s reduced-motion preference. An explicit checkbox choice takes precedence and is saved locally. Use device motion preference restores automatic handling.
+
+
+### Recognizing collectibles
+Magnet: U-shaped horseshoe, pulls fish closer. Shield: cardboard box, blocks one bump for up to 8 seconds. Catnip: leafy sprig, doubles fish and readies Zoomies. Yarn: purple wound ball, an outfit token. Heart: pink heart, one extra chance (maximum two). Surprise: wrapped gift, awards bonus fish. Each has an in-flight nameplate; How to play includes short explanations.
