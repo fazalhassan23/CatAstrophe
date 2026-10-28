@@ -14,8 +14,14 @@ function applySettings(){
  renderer.motion=save.settings.motion&&(save.settings.motionOverride||!matchMedia('(prefers-reduced-motion: reduce)').matches);
  $('#sound').textContent=save.settings.mute?'Sound off':'Sound on';
 }
-function button(text,action,cls='secondary'){const b=document.createElement('button');b.textContent=text;b.className=cls;b.onclick=()=>action();return b}
-function show(html){const s=$('#screen');s.className='screen';s.innerHTML='<div class="panel panel-'+mode+'">'+html+'</div>';return s.firstElementChild}
+function button(text,action,cls='secondary'){const b=document.createElement('button');b.textContent=text;b.className=cls;b.onclick=()=>{
+ const panel=b.closest('.panel'),buttons=panel?Array.from(panel.querySelectorAll('button')):[],index=buttons.indexOf(b),panelClass=panel?.className;
+ action();
+ // Selection and pagination rebuild the same panel: keep the user's place.
+ const next=$('#screen').firstElementChild;
+ if(panel&&!b.isConnected&&next?.className===panelClass)next.querySelectorAll('button')[index]?.focus();
+};return b}
+function show(html){const s=$('#screen'),moveFocus=s.contains(document.activeElement)||document.activeElement===canvas;s.className='screen';s.innerHTML='<div class="panel panel-'+mode+'" tabindex="-1">'+html+'</div>';const panel=s.firstElementChild;if(moveFocus)panel.focus();return panel}
 function flightHelp(){return matchMedia('(pointer: coarse)').matches?{flap:'Tap the sky',dash:'Tap ZOOMIES',pause:'Tap the pause button'}:{flap:'Press Space or ↑',dash:'Press X or click ZOOMIES',pause:'Press P to pause'}}
 function friendlyHint(text){const h=flightHelp();return text.replaceAll('Tap the sky or press Space / ↑',h.flap).replaceAll('Press X or tap ZOOMIES',h.dash)}
 function note(p,text){const n=document.createElement('p');n.textContent=text;p.append(n)}
@@ -220,6 +226,7 @@ document.addEventListener('keydown',e=>{
 
  // Native form controls own their keys, including sliders and editable descendants.
  if(e.target.closest('input,select,textarea,[contenteditable]:not([contenteditable="false"]),[role="slider"]'))return;
+ if(e.target.closest('summary'))return;
  if(e.target.closest('button,a')&&['Space','ArrowUp'].includes(e.code))return;
  if(['Space','ArrowUp'].includes(e.code)&&['playing','menu','over'].includes(mode)){e.preventDefault();if(e.repeat)return;if(mode==='playing')flap();else if(mode==='menu'){if(save.walkthroughComplete)start();else startWalkthrough()}else if(mode==='over')start()}
  if(e.code==='KeyP'||e.code==='Escape'){e.preventDefault();pause()}
